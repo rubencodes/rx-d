@@ -29,7 +29,7 @@ struct MarkDoseTakenIntent: AppIntent {
         let logs = (try? context.fetch(FetchDescriptor<DoseLog>())) ?? []
         if let existing = logs.first(where: {
             $0.prescriptionId == pid &&
-            Calendar.current.isDate($0.scheduledDate, equalTo: date, toGranularity: .minute)
+                Calendar.current.isDate($0.scheduledDate, equalTo: date, toGranularity: .minute)
         }) {
             existing.status = .taken
             existing.completedAt = Date()

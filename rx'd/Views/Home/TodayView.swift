@@ -1,5 +1,5 @@
-import SwiftUI
 import SwiftData
+import SwiftUI
 import WidgetKit
 
 struct TodayView: View {
@@ -101,7 +101,7 @@ struct TodayView: View {
                         scheduledDate: date,
                         doseLog: todayLogs.first {
                             $0.prescriptionId == prescription.id &&
-                            cal.isDate($0.scheduledDate, equalTo: date, toGranularity: .minute)
+                                cal.isDate($0.scheduledDate, equalTo: date, toGranularity: .minute)
                         }
                     )
                 }
@@ -116,7 +116,8 @@ struct TodayView: View {
     // MARK: - Header
 
     private func header(now: Date, taken: Int, total: Int, done: Bool,
-                        isEmpty: Bool, next: ScheduledOccurrence?) -> some View {
+                        isEmpty: Bool, next: ScheduledOccurrence?) -> some View
+    {
         LabelCard {
             HStack(spacing: 16) {
                 PillBuddy(
@@ -134,7 +135,7 @@ struct TodayView: View {
                         .foregroundStyle(Theme.ink)
                     if total > 0 {
                         Text(done ? "All caught up — nice work!"
-                                  : "\(taken) of \(total) doses taken")
+                            : "\(taken) of \(total) doses taken")
                             .font(.subheadline)
                             .foregroundStyle(Theme.inkFaded)
                         if !done {
@@ -204,10 +205,10 @@ struct TodayView: View {
 
     private func greeting(now: Date) -> String {
         switch Calendar.current.component(.hour, from: now) {
-        case 5..<12:  return "Good morning"
-        case 12..<17: return "Good afternoon"
-        case 17..<22: return "Good evening"
-        default:      return "Hello"
+        case 5 ..< 12: return "Good morning"
+        case 12 ..< 17: return "Good afternoon"
+        case 17 ..< 22: return "Good evening"
+        default: return "Hello"
         }
     }
 
@@ -261,7 +262,7 @@ struct TodayView: View {
         }
 
         Haptics.tap()
-        if !wasAllDone && isAllDone(now: now) {
+        if !wasAllDone, isAllDone(now: now) {
             Haptics.success()
             confettiTrigger += 1
         }

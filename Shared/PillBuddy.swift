@@ -6,7 +6,7 @@ struct PillBuddy: View {
     enum Mood { case happy, content, sleepy }
 
     var mood: Mood = .content
-    var topColor: Color = Theme.accent   // tints the cap + label rule
+    var topColor: Color = Theme.accent // tints the cap + label rule
     var size: CGFloat = 96
 
     private var w: CGFloat { size }
@@ -19,7 +19,8 @@ struct PillBuddy: View {
                 .fill(LinearGradient(
                     colors: [Color(light: 0xCB8136, dark: 0xB06B23),
                              Color(light: 0xA8611E, dark: 0x8A4F18)],
-                    startPoint: .topLeading, endPoint: .bottomTrailing))
+                    startPoint: .topLeading, endPoint: .bottomTrailing
+                ))
                 .frame(width: w * 0.92, height: h * 0.78)
                 .overlay(
                     RoundedRectangle(cornerRadius: size * 0.16)

@@ -1,3 +1,4 @@
+import SwiftData
 import SwiftUI
 
 struct OnboardingFlow: View {
@@ -8,11 +9,12 @@ struct OnboardingFlow: View {
 
     private static func initialStep() -> Int {
         #if DEBUG
-        let args = ProcessInfo.processInfo.arguments
-        if let i = args.firstIndex(of: "--onboarding-step"), i + 1 < args.count,
-           let n = Int(args[i + 1]) {
-            return n
-        }
+            let args = ProcessInfo.processInfo.arguments
+            if let i = args.firstIndex(of: "--onboarding-step"), i + 1 < args.count,
+               let n = Int(args[i + 1])
+            {
+                return n
+            }
         #endif
         return 0
     }

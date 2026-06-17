@@ -1,15 +1,15 @@
-import WidgetKit
-import SwiftData
 import Foundation
+import SwiftData
+import WidgetKit
 
 struct CalendarProvider: TimelineProvider {
-    func placeholder(in context: Context) -> CalendarEntry { .placeholder() }
+    func placeholder(in _: Context) -> CalendarEntry { .placeholder() }
 
-    func getSnapshot(in context: Context, completion: @escaping (CalendarEntry) -> Void) {
+    func getSnapshot(in _: Context, completion: @escaping (CalendarEntry) -> Void) {
         Task { @MainActor in completion(makeEntry()) }
     }
 
-    func getTimeline(in context: Context, completion: @escaping (Timeline<CalendarEntry>) -> Void) {
+    func getTimeline(in _: Context, completion: @escaping (Timeline<CalendarEntry>) -> Void) {
         Task { @MainActor in
             let entry = makeEntry()
             let cal = Calendar.current
@@ -34,7 +34,7 @@ struct CalendarProvider: TimelineProvider {
         let logs = (try? ctx.fetch(FetchDescriptor<DoseLog>())) ?? []
 
         let count = cal.range(of: .day, in: .month, for: monthStart)?.count ?? 30
-        let days: [CalendarDay] = (0..<count).compactMap { offset in
+        let days: [CalendarDay] = (0 ..< count).compactMap { offset in
             guard let day = cal.date(byAdding: .day, value: offset, to: monthStart) else { return nil }
             let a = DayAdherence.compute(prescriptions: prescriptions, logs: logs, day: day, now: now)
             return CalendarDay(date: day, total: a.total, taken: a.taken)

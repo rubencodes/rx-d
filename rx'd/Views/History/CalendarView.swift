@@ -106,7 +106,7 @@ struct CalendarView: View {
         let daysInMonth = cal.range(of: .day, in: .month, for: start)!.count
 
         var days: [Date?] = Array(repeating: nil, count: firstWeekday)
-        for day in 0..<daysInMonth {
+        for day in 0 ..< daysInMonth {
             days.append(cal.date(byAdding: .day, value: day, to: start))
         }
         return days

@@ -1,5 +1,5 @@
-import WidgetKit
 import SwiftUI
+import WidgetKit
 
 struct CalendarWidgetView: View {
     let entry: CalendarEntry
@@ -36,7 +36,7 @@ struct CalendarWidgetView: View {
             }
 
             LazyVGrid(columns: columns, spacing: 3) {
-                ForEach(0..<leadingBlanks, id: \.self) { _ in Color.clear.frame(height: 26) }
+                ForEach(0 ..< leadingBlanks, id: \.self) { _ in Color.clear.frame(height: 26) }
                 ForEach(entry.days) { day in cell(day) }
             }
             Spacer(minLength: 0)

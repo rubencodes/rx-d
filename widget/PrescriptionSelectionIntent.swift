@@ -1,5 +1,5 @@
-import WidgetKit
 import AppIntents
+import WidgetKit
 
 // Widget configuration: optionally pick one prescription to track.
 // Leaving it unset (the default) shows all of today's doses.

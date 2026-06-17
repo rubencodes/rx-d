@@ -1,12 +1,12 @@
-import SwiftUI
 import SwiftData
+import SwiftUI
 import WidgetKit
 
 struct DayDetailView: View {
     let day: Date
     let allLogs: [DoseLog]
     let allPrescriptions: [Prescription]
-    var now: Date = Date()
+    var now: Date = .init()
 
     @Environment(\.modelContext) private var context
     @State private var confirmRetroactive: ScheduledOccurrence?
@@ -23,7 +23,7 @@ struct DayDetailView: View {
                         scheduledDate: date,
                         doseLog: dayLogs.first {
                             $0.prescriptionId == prescription.id &&
-                            cal.isDate($0.scheduledDate, equalTo: date, toGranularity: .minute)
+                                cal.isDate($0.scheduledDate, equalTo: date, toGranularity: .minute)
                         }
                     )
                 }
@@ -74,7 +74,8 @@ struct DayDetailView: View {
                                         .foregroundStyle(.secondary)
                                 }
                                 if let filename = occ.doseLog?.photoFilename,
-                                   let image = PhotoStore.load(filename) {
+                                   let image = PhotoStore.load(filename)
+                                {
                                     Image(uiImage: image)
                                         .resizable()
                                         .scaledToFill()

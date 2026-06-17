@@ -1,5 +1,5 @@
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 struct HistoryView: View {
     @Query private var allLogs: [DoseLog]

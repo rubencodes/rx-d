@@ -1,5 +1,5 @@
-import WidgetKit
 import SwiftUI
+import WidgetKit
 
 // Widget configuration. The content view (PrescriptionWidgetView) lives in Shared.
 struct PrescriptionWidget: Widget {

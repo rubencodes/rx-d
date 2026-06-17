@@ -27,16 +27,16 @@ struct RootTabView: View {
 
     private static func initialSelection() -> Int {
         #if DEBUG
-        let args = ProcessInfo.processInfo.arguments
-        if let i = args.firstIndex(of: "--tab"), i + 1 < args.count {
-            switch args[i + 1] {
-            case "schedule": return 1
-            case "history": return 2
-            case "health": return 3
-            case "settings": return 4
-            default: return 0
+            let args = ProcessInfo.processInfo.arguments
+            if let i = args.firstIndex(of: "--tab"), i + 1 < args.count {
+                switch args[i + 1] {
+                case "schedule": return 1
+                case "history": return 2
+                case "health": return 3
+                case "settings": return 4
+                default: return 0
+                }
             }
-        }
         #endif
         return 0
     }

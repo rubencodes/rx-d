@@ -1,5 +1,5 @@
-import SwiftUI
 import SwiftData
+import SwiftUI
 import WidgetKit
 
 // Handles the onboarding gate, the Control Center confirmation alert, and the
@@ -12,30 +12,30 @@ struct RootView: View {
     var body: some View {
         Group {
             #if DEBUG
-            if ProcessInfo.processInfo.arguments.contains("--widget-gallery") {
-                WidgetGalleryView()
-            } else if showOnboarding {
-                OnboardingFlow(onComplete: { showOnboarding = false })
-            } else {
-                mainContent
-            }
+                if ProcessInfo.processInfo.arguments.contains("--widget-gallery") {
+                    WidgetGalleryView()
+                } else if showOnboarding {
+                    OnboardingFlow(onComplete: { showOnboarding = false })
+                } else {
+                    mainContent
+                }
             #else
-            if showOnboarding {
-                OnboardingFlow(onComplete: { showOnboarding = false })
-            } else {
-                mainContent
-            }
+                if showOnboarding {
+                    OnboardingFlow(onComplete: { showOnboarding = false })
+                } else {
+                    mainContent
+                }
             #endif
         }
         .task {
             #if DEBUG
-            if DebugSeed.isRequested {
-                DebugSeed.run(context: ModelContext(container))
-                // Keep onboarding visible when explicitly testing an onboarding step.
-                if !ProcessInfo.processInfo.arguments.contains("--onboarding-step") {
-                    showOnboarding = false
+                if DebugSeed.isRequested {
+                    DebugSeed.run(context: ModelContext(container))
+                    // Keep onboarding visible when explicitly testing an onboarding step.
+                    if !ProcessInfo.processInfo.arguments.contains("--onboarding-step") {
+                        showOnboarding = false
+                    }
                 }
-            }
             #endif
         }
         // Central safety net: any SwiftData save (add/edit/archive/delete/mark/etc.)
@@ -68,11 +68,12 @@ struct RootView: View {
 
     private func checkPendingConfirmation() {
         #if DEBUG
-        if SharedDefaults.shared.pendingDoseConfirmation == nil,
-           ProcessInfo.processInfo.arguments.contains("--confirm-dose") {
-            SharedDefaults.shared.pendingDoseConfirmation =
-                "\(UUID())|\(Date().timeIntervalSince1970)|Evening Magnesium"
-        }
+            if SharedDefaults.shared.pendingDoseConfirmation == nil,
+               ProcessInfo.processInfo.arguments.contains("--confirm-dose")
+            {
+                SharedDefaults.shared.pendingDoseConfirmation =
+                    "\(UUID())|\(Date().timeIntervalSince1970)|Evening Magnesium"
+            }
         #endif
         guard let raw = SharedDefaults.shared.pendingDoseConfirmation else { return }
         SharedDefaults.shared.pendingDoseConfirmation = nil
@@ -88,7 +89,7 @@ struct RootView: View {
         let logs = (try? context.fetch(FetchDescriptor<DoseLog>())) ?? []
         if let existing = logs.first(where: {
             $0.prescriptionId == dose.prescriptionId &&
-            Calendar.current.isDate($0.scheduledDate, equalTo: dose.date, toGranularity: .minute)
+                Calendar.current.isDate($0.scheduledDate, equalTo: dose.date, toGranularity: .minute)
         }) {
             existing.status = .taken
             existing.completedAt = Date()

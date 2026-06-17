@@ -1,6 +1,6 @@
-import WidgetKit
-import SwiftUI
 import AppIntents
+import SwiftUI
+import WidgetKit
 
 // Control Center / Lock Screen control showing the next pending dose.
 // Tapping marks it taken (no-op when there's nothing due).

@@ -1,5 +1,5 @@
-import WidgetKit
 import SwiftUI
+import WidgetKit
 
 // Widget configuration. The content view (LockScreenWidgetView) lives in Shared.
 struct LockScreenWidget: Widget {

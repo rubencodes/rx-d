@@ -8,7 +8,8 @@ enum ModelContainerFactory {
 
     private static func appGroupStoreURL() throws -> URL {
         guard let groupURL = FileManager.default
-            .containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier) else {
+            .containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier)
+        else {
             throw ContainerError.missingAppGroup
         }
         return groupURL.appendingPathComponent(storeName)

@@ -1,5 +1,5 @@
-import SwiftUI
 import SwiftData
+import SwiftUI
 import WidgetKit
 
 struct ScheduleView: View {
@@ -50,12 +50,12 @@ struct ScheduleView: View {
             .navigationTitle("Schedule")
             .task {
                 #if DEBUG
-                if ProcessInfo.processInfo.arguments.contains("--show-delete-alert") {
-                    deleteTarget = archived.first
-                }
-                if ProcessInfo.processInfo.arguments.contains("--show-archived-detail") {
-                    archivedDetail = archived.first
-                }
+                    if ProcessInfo.processInfo.arguments.contains("--show-delete-alert") {
+                        deleteTarget = archived.first
+                    }
+                    if ProcessInfo.processInfo.arguments.contains("--show-archived-detail") {
+                        archivedDetail = archived.first
+                    }
                 #endif
             }
             .toolbar {
@@ -241,7 +241,7 @@ struct ScheduleView: View {
         switch p.frequency {
         case .daily:
             return "Daily"
-        case .weekly(let days):
+        case let .weekly(days):
             let names = Weekday.allCases
                 .filter { days.contains($0) }
                 .map(\.shortName)

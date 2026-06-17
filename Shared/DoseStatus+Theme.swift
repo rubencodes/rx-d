@@ -4,18 +4,18 @@ extension DoseStatus {
     var themeColor: Color {
         switch self {
         case .pending: Theme.pending
-        case .taken:   Theme.taken
+        case .taken: Theme.taken
         case .snoozed: Theme.snoozed
-        case .missed:  Theme.missed
+        case .missed: Theme.missed
         }
     }
 
     var iconName: String {
         switch self {
         case .pending: "hourglass"
-        case .taken:   "checkmark"
+        case .taken: "checkmark"
         case .snoozed: "zzz"
-        case .missed:  "exclamationmark"
+        case .missed: "exclamationmark"
         }
     }
 
@@ -23,9 +23,9 @@ extension DoseStatus {
     var stampLabel: String {
         switch self {
         case .pending: "DUE"
-        case .taken:   "TAKEN"
+        case .taken: "TAKEN"
         case .snoozed: "SNOOZED"
-        case .missed:  "MISSED"
+        case .missed: "MISSED"
         }
     }
 }

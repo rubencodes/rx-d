@@ -1,18 +1,18 @@
-import WidgetKit
-import SwiftData
 import Foundation
+import SwiftData
+import WidgetKit
 
 struct WidgetProvider: AppIntentTimelineProvider {
-    func placeholder(in context: Context) -> DoseEntry {
+    func placeholder(in _: Context) -> DoseEntry {
         .placeholder()
     }
 
-    func snapshot(for configuration: PrescriptionSelectionIntent, in context: Context) async -> DoseEntry {
+    func snapshot(for configuration: PrescriptionSelectionIntent, in _: Context) async -> DoseEntry {
         await makeEntry(for: configuration)
     }
 
     @MainActor
-    func timeline(for configuration: PrescriptionSelectionIntent, in context: Context) async -> Timeline<DoseEntry> {
+    func timeline(for configuration: PrescriptionSelectionIntent, in _: Context) async -> Timeline<DoseEntry> {
         let entry = await makeEntry(for: configuration)
 
         // Refresh at each remaining dose time today, and at the next midnight.
@@ -47,7 +47,8 @@ struct WidgetProvider: AppIntentTimelineProvider {
         // (no selection, or a stale/deleted one) show all of today's doses.
         let selected: [Prescription]
         if let id = configuration.prescription?.id,
-           prescriptions.contains(where: { $0.id == id }) {
+           prescriptions.contains(where: { $0.id == id })
+        {
             selected = prescriptions.filter { $0.id == id }
         } else {
             selected = prescriptions
@@ -59,7 +60,7 @@ struct WidgetProvider: AppIntentTimelineProvider {
             for date in ScheduleService.occurrences(for: prescription, on: now) {
                 let log = logs.first {
                     $0.prescriptionId == prescription.id &&
-                    cal.isDate($0.scheduledDate, equalTo: date, toGranularity: .minute)
+                        cal.isDate($0.scheduledDate, equalTo: date, toGranularity: .minute)
                 }
                 let status = log?.status ?? (date <= now ? .missed : .pending)
                 items.append(DoseItem(

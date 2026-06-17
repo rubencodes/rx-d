@@ -1,12 +1,12 @@
-import UIKit
-import SwiftData
-import UserNotifications
 import BackgroundTasks
+import SwiftData
+import UIKit
+import UserNotifications
 
 final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     func application(
-        _ application: UIApplication,
-        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+        _: UIApplication,
+        didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         NotificationService.registerCategories()
         UNUserNotificationCenter.current().delegate = self
@@ -17,7 +17,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     // MARK: - Notification actions
 
     func userNotificationCenter(
-        _ center: UNUserNotificationCenter,
+        _: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
@@ -62,7 +62,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
             let logs = (try? context.fetch(FetchDescriptor<DoseLog>())) ?? []
             if let existing = logs.first(where: {
                 $0.prescriptionId == prescriptionId &&
-                Calendar.current.isDate($0.scheduledDate, equalTo: scheduledDate, toGranularity: .minute)
+                    Calendar.current.isDate($0.scheduledDate, equalTo: scheduledDate, toGranularity: .minute)
             }) {
                 existing.status = .taken
                 existing.completedAt = Date()
@@ -83,7 +83,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
             let logs = (try? context.fetch(FetchDescriptor<DoseLog>())) ?? []
             if let existing = logs.first(where: {
                 $0.prescriptionId == prescriptionId &&
-                Calendar.current.isDate($0.scheduledDate, equalTo: scheduledDate, toGranularity: .minute)
+                    Calendar.current.isDate($0.scheduledDate, equalTo: scheduledDate, toGranularity: .minute)
             }) {
                 existing.status = .snoozed
                 existing.snoozeCount += 1

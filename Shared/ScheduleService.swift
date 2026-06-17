@@ -39,13 +39,14 @@ enum ScheduleService {
         // Archived prescriptions stop generating occurrences after their archive day.
         // (Past logs from when it was active are preserved and still shown in history.)
         if let archivedAt = prescription.archivedAt,
-           dayStart > cal.startOfDay(for: archivedAt) {
+           dayStart > cal.startOfDay(for: archivedAt)
+        {
             return false
         }
         switch prescription.frequency {
         case .daily:
             return true
-        case .weekly(let days):
+        case let .weekly(days):
             let weekday = Calendar.current.component(.weekday, from: day)
             return days.contains(Weekday(rawValue: weekday) ?? .sunday)
         }

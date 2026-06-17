@@ -46,7 +46,7 @@ enum NotificationService {
         // Index taken doses by prescription so we can skip them while scheduling.
         let takenLogs = logs.filter { $0.status == .taken }
 
-        outer: for dayOffset in 0..<daysAhead {
+        outer: for dayOffset in 0 ..< daysAhead {
             guard let day = cal.date(byAdding: .day, value: dayOffset, to: today) else { continue }
             for prescription in prescriptions where !prescription.isArchived {
                 let occurrences = ScheduleService.occurrences(for: prescription, on: day)
@@ -55,7 +55,7 @@ enum NotificationService {
                     // Don't (re)schedule reminders for a dose that's already been taken.
                     let alreadyTaken = takenLogs.contains {
                         $0.prescriptionId == prescription.id &&
-                        cal.isDate($0.scheduledDate, equalTo: date, toGranularity: .minute)
+                            cal.isDate($0.scheduledDate, equalTo: date, toGranularity: .minute)
                     }
                     if alreadyTaken { continue }
                     await schedule(prescription: prescription, at: date, center: center)
@@ -74,7 +74,7 @@ enum NotificationService {
         let timeStr = scheduledDate.hhmmString
         let ids = [
             "\(prescriptionId)-\(dateStr)-\(timeStr)-primary",
-            "\(prescriptionId)-\(dateStr)-\(timeStr)-followup"
+            "\(prescriptionId)-\(dateStr)-\(timeStr)-followup",
         ]
         UNUserNotificationCenter.current()
             .removePendingNotificationRequests(withIdentifiers: ids)
@@ -154,7 +154,7 @@ enum NotificationService {
         content.sound = .default
         var info: [String: Any] = [
             "prescriptionId": prescriptionId,
-            "scheduledDate": scheduledDate
+            "scheduledDate": scheduledDate,
         ]
         if let fid = followUpId { info["followUpId"] = fid }
         content.userInfo = info

@@ -26,10 +26,10 @@ final class DoseLog {
         photoFilename: String? = nil,
         isFromHealth: Bool = false
     ) {
-        self.id = UUID()
+        id = UUID()
         self.prescriptionId = prescriptionId
         self.scheduledDate = scheduledDate
-        self.statusRaw = status.rawValue
+        statusRaw = status.rawValue
         self.completedAt = completedAt
         self.snoozeCount = snoozeCount
         self.noteText = noteText

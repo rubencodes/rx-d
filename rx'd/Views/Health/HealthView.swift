@@ -1,6 +1,6 @@
-import SwiftUI
-import SwiftData
 import Charts
+import SwiftData
+import SwiftUI
 
 struct HealthView: View {
     @Query(filter: #Predicate<Prescription> { !$0.isArchived })
@@ -17,22 +17,23 @@ struct HealthView: View {
 
     private static func initialConnected() -> Bool {
         #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("--health-connected") { return true }
+            if ProcessInfo.processInfo.arguments.contains("--health-connected") { return true }
         #endif
         return SharedDefaults.shared.healthConnected
     }
 
     private static var debugShowImport: Bool {
         #if DEBUG
-        return ProcessInfo.processInfo.arguments.contains("--show-import")
+            return ProcessInfo.processInfo.arguments.contains("--show-import")
         #else
-        return false
+            return false
         #endif
     }
 
     private var withData: [HealthKitService.Vital] {
         HealthKitService.Vital.allCases.filter { !(data[$0] ?? [:]).isEmpty }
     }
+
     private var withoutData: [HealthKitService.Vital] {
         HealthKitService.Vital.allCases.filter { (data[$0] ?? [:]).isEmpty }
     }
@@ -229,7 +230,7 @@ struct HealthView: View {
     private func points(for vital: HealthKitService.Vital) -> [DayPoint] {
         let values = data[vital] ?? [:]
         let today = cal.startOfDay(for: Date())
-        return (0..<dayCount).reversed().map { offset in
+        return (0 ..< dayCount).reversed().map { offset in
             let day = cal.date(byAdding: .day, value: -offset, to: today)!
             return DayPoint(date: day, value: values[day], color: adherenceColor(for: day))
         }
@@ -248,21 +249,21 @@ struct HealthView: View {
         let end = cal.date(byAdding: .day, value: 1, to: today)!
 
         #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("--fake-vitals") {
-            var result: [HealthKitService.Vital: [Date: Double]] = [:]
-            for vital in [HealthKitService.Vital.systolicBP, .restingHeartRate] {
-                var series: [Date: Double] = [:]
-                let base: Double = vital == .systolicBP ? 122 : 64
-                for offset in 0..<dayCount {
-                    let day = cal.date(byAdding: .day, value: -offset, to: today)!
-                    series[day] = base + Double((offset * 7) % 18) - 6
+            if ProcessInfo.processInfo.arguments.contains("--fake-vitals") {
+                var result: [HealthKitService.Vital: [Date: Double]] = [:]
+                for vital in [HealthKitService.Vital.systolicBP, .restingHeartRate] {
+                    var series: [Date: Double] = [:]
+                    let base: Double = vital == .systolicBP ? 122 : 64
+                    for offset in 0 ..< dayCount {
+                        let day = cal.date(byAdding: .day, value: -offset, to: today)!
+                        series[day] = base + Double((offset * 7) % 18) - 6
+                    }
+                    result[vital] = series
                 }
-                result[vital] = series
+                data = result
+                loading = false
+                return
             }
-            data = result
-            loading = false
-            return
-        }
         #endif
 
         var result: [HealthKitService.Vital: [Date: Double]] = [:]

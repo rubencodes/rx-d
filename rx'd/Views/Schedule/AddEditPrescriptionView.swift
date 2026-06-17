@@ -1,5 +1,5 @@
-import SwiftUI
 import SwiftData
+import SwiftUI
 import UserNotifications
 import WidgetKit
 
@@ -32,7 +32,7 @@ struct AddEditPrescriptionView: View {
     private var isEditing: Bool { prescription != nil }
     private var isValid: Bool {
         !name.trimmingCharacters(in: .whitespaces).isEmpty &&
-        (isDaily || !selectedDays.isEmpty)
+            (isDaily || !selectedDays.isEmpty)
     }
 
     // Non-blocking: warns when another active prescription already uses this name.
@@ -41,7 +41,7 @@ struct AddEditPrescriptionView: View {
         guard !trimmed.isEmpty else { return false }
         return activePrescriptions.contains {
             $0.id != prescription?.id &&
-            $0.name.trimmingCharacters(in: .whitespaces).lowercased() == trimmed
+                $0.name.trimmingCharacters(in: .whitespaces).lowercased() == trimmed
         }
     }
 
@@ -49,12 +49,12 @@ struct AddEditPrescriptionView: View {
         ("30 min", 1800),
         ("1 hour", 3600),
         ("2 hours", 7200),
-        ("4 hours", 14400)
+        ("4 hours", 14400),
     ]
 
     let colorOptions = [
         "#5B8DEF", "#FF6B6B", "#51CF66", "#FAB005",
-        "#CC5DE8", "#339AF0", "#FF922B", "#20C997"
+        "#CC5DE8", "#339AF0", "#FF922B", "#20C997",
     ]
 
     var body: some View {
@@ -103,7 +103,7 @@ struct AddEditPrescriptionView: View {
 
                 Section("Notes") {
                     TextField("Optional", text: $notes, axis: .vertical)
-                        .lineLimit(3...6)
+                        .lineLimit(3 ... 6)
                 }
 
                 if let footerNote {
@@ -171,12 +171,12 @@ struct AddEditPrescriptionView: View {
 
     private func populate() {
         #if DEBUG
-        if prescription == nil {
-            let args = ProcessInfo.processInfo.arguments
-            if let i = args.firstIndex(of: "--prefill-name"), i + 1 < args.count {
-                name = args[i + 1]
+            if prescription == nil {
+                let args = ProcessInfo.processInfo.arguments
+                if let i = args.firstIndex(of: "--prefill-name"), i + 1 < args.count {
+                    name = args[i + 1]
+                }
             }
-        }
         #endif
         guard let p = prescription else { return }
         name = p.name
@@ -187,7 +187,7 @@ struct AddEditPrescriptionView: View {
         switch p.frequency {
         case .daily:
             isDaily = true
-        case .weekly(let days):
+        case let .weekly(days):
             isDaily = false
             selectedDays = days
         }

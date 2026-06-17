@@ -1,5 +1,5 @@
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 // Read-only detail for an archived prescription: its info + full dose history,
 // with Restore and permanent-Delete actions.
@@ -137,7 +137,7 @@ struct ArchivedDetailView: View {
     private var frequencyLabel: String {
         switch prescription.frequency {
         case .daily: return "Daily"
-        case .weekly(let days):
+        case let .weekly(days):
             let names = Weekday.allCases.filter { days.contains($0) }.map(\.shortName).joined(separator: ", ")
             return names.isEmpty ? "Weekly" : names
         }

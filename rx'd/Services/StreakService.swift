@@ -36,8 +36,8 @@ enum StreakService {
                 ScheduleService.occurrences(for: prescription, on: checking).allSatisfy { date in
                     dayLogs.contains {
                         $0.prescriptionId == prescription.id &&
-                        cal.isDate($0.scheduledDate, equalTo: date, toGranularity: .minute) &&
-                        $0.status == .taken
+                            cal.isDate($0.scheduledDate, equalTo: date, toGranularity: .minute) &&
+                            $0.status == .taken
                     }
                 }
             }

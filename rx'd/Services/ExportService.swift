@@ -13,7 +13,7 @@ enum ExportService {
                 log.status.rawValue,
                 log.completedAt?.iso8601String ?? "",
                 "\(log.snoozeCount)",
-                log.noteText?.csvEscaped ?? ""
+                log.noteText?.csvEscaped ?? "",
             ].joined(separator: ",")
         }.joined(separator: "\n")
         return header + rows

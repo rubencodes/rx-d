@@ -6,7 +6,7 @@ import SwiftUI
 struct StatusStamp: View {
     let status: DoseStatus
     var scheduledDate: Date? = nil
-    var now: Date = Date()
+    var now: Date = .init()
 
     private var label: String {
         if status == .pending, let date = scheduledDate {

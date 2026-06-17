@@ -1,20 +1,20 @@
-import WidgetKit
 import SwiftUI
+import WidgetKit
 
 // Lock-screen accessory content. Accessory families render monochrome, so we lean
 // on SF Symbols + text (and the ℞ glyph) rather than color.
 struct LockScreenWidgetView: View {
     @Environment(\.widgetFamily) private var envFamily
-    var familyOverride: WidgetFamily? = nil   // DEBUG gallery only
+    var familyOverride: WidgetFamily? = nil // DEBUG gallery only
     let entry: DoseEntry
 
     private var family: WidgetFamily { familyOverride ?? envFamily }
 
     var body: some View {
         switch family {
-        case .accessoryCircular:    circularView
-        case .accessoryInline:      inlineView
-        default:                    rectangularView
+        case .accessoryCircular: circularView
+        case .accessoryInline: inlineView
+        default: rectangularView
         }
     }
 
@@ -32,7 +32,7 @@ struct LockScreenWidgetView: View {
     private var total: Int { entry.items.count }
 
     private var circularView: some View {
-        Gauge(value: Double(takenCount), in: 0...Double(max(total, 1))) {
+        Gauge(value: Double(takenCount), in: 0 ... Double(max(total, 1))) {
             Image(systemName: "pill.fill")
         } currentValueLabel: {
             Text("\(takenCount)/\(total)")

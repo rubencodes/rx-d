@@ -2,7 +2,7 @@ import Foundation
 
 extension String {
     var csvEscaped: String {
-        let escaped = self.replacingOccurrences(of: "\"", with: "\"\"")
+        let escaped = replacingOccurrences(of: "\"", with: "\"\"")
         return "\"\(escaped)\""
     }
 }

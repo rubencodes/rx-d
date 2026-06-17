@@ -8,7 +8,7 @@ struct ConfettiBurst: View {
 
     private struct Piece: Identifiable {
         let id = UUID()
-        let angle: Double      // radians
+        let angle: Double // radians
         let speed: CGFloat
         let color: Color
         let isPill: Bool
@@ -16,16 +16,16 @@ struct ConfettiBurst: View {
     }
 
     private static let palette: [Color] = [
-        Theme.accent, Theme.oxblood, Theme.gold, Theme.taken, Theme.ink
+        Theme.accent, Theme.oxblood, Theme.gold, Theme.taken, Theme.ink,
     ]
 
-    private let pieces: [Piece] = (0..<30).map { i in
+    private let pieces: [Piece] = (0 ..< 30).map { i in
         Piece(
-            angle: .pi * (0.15 + 0.7 * Double(i) / 29.0) + .pi,   // fan upward
-            speed: CGFloat.random(in: 160...340),
+            angle: .pi * (0.15 + 0.7 * Double(i) / 29.0) + .pi, // fan upward
+            speed: CGFloat.random(in: 160 ... 340),
             color: palette[i % palette.count],
             isPill: i % 2 == 0,
-            spin: Double.random(in: -540...540)
+            spin: Double.random(in: -540 ... 540)
         )
     }
 
@@ -39,7 +39,7 @@ struct ConfettiBurst: View {
                     piece(p)
                         .position(
                             x: origin.x + cos(p.angle) * p.speed * t,
-                            y: origin.y + sin(p.angle) * p.speed * t + 420 * t * t  // gravity
+                            y: origin.y + sin(p.angle) * p.speed * t + 420 * t * t // gravity
                         )
                         .rotationEffect(.degrees(p.spin * Double(t)))
                         .opacity(t == 0 ? 0 : Double(1 - t))

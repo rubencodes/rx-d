@@ -1,6 +1,6 @@
-import SwiftUI
-import SwiftData
 import PhotosUI
+import SwiftData
+import SwiftUI
 import WidgetKit
 
 struct DoseDetailView: View {
@@ -42,7 +42,7 @@ struct DoseDetailView: View {
 
                 Section("Note") {
                     TextField("Add a note", text: $noteText, axis: .vertical)
-                        .lineLimit(2...5)
+                        .lineLimit(2 ... 5)
                 }
 
                 Section("Photo") {

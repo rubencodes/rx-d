@@ -1,9 +1,9 @@
-import WidgetKit
 import Foundation
+import WidgetKit
 
 struct DoseEntry: TimelineEntry {
     let date: Date
-    let items: [DoseItem]    // today's doses (for selected prescription, or all if none selected)
+    let items: [DoseItem] // today's doses (for selected prescription, or all if none selected)
     let streak: Int
 
     static func placeholder() -> DoseEntry {
@@ -11,7 +11,7 @@ struct DoseEntry: TimelineEntry {
             date: Date(),
             items: [
                 DoseItem(prescriptionId: UUID(), name: "Morning Vitamins",
-                         colorHex: "#5B8DEF", scheduledDate: Date(), status: .pending)
+                         colorHex: "#5B8DEF", scheduledDate: Date(), status: .pending),
             ],
             streak: 3
         )

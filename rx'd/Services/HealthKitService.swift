@@ -17,41 +17,41 @@ enum HealthKitService {
 
         var title: String {
             switch self {
-            case .weight:           "Weight"
+            case .weight: "Weight"
             case .restingHeartRate: "Resting Heart Rate"
-            case .bloodGlucose:     "Blood Glucose"
-            case .systolicBP:       "Blood Pressure (Systolic)"
-            case .steps:            "Steps"
+            case .bloodGlucose: "Blood Glucose"
+            case .systolicBP: "Blood Pressure (Systolic)"
+            case .steps: "Steps"
             }
         }
 
         var unitLabel: String {
             switch self {
-            case .weight:           "lb"
+            case .weight: "lb"
             case .restingHeartRate: "bpm"
-            case .bloodGlucose:     "mg/dL"
-            case .systolicBP:       "mmHg"
-            case .steps:            "steps"
+            case .bloodGlucose: "mg/dL"
+            case .systolicBP: "mmHg"
+            case .steps: "steps"
             }
         }
 
         var quantityType: HKQuantityType {
             switch self {
-            case .weight:           HKQuantityType(.bodyMass)
+            case .weight: HKQuantityType(.bodyMass)
             case .restingHeartRate: HKQuantityType(.restingHeartRate)
-            case .bloodGlucose:     HKQuantityType(.bloodGlucose)
-            case .systolicBP:       HKQuantityType(.bloodPressureSystolic)
-            case .steps:            HKQuantityType(.stepCount)
+            case .bloodGlucose: HKQuantityType(.bloodGlucose)
+            case .systolicBP: HKQuantityType(.bloodPressureSystolic)
+            case .steps: HKQuantityType(.stepCount)
             }
         }
 
         var unit: HKUnit {
             switch self {
-            case .weight:           .pound()
+            case .weight: .pound()
             case .restingHeartRate: HKUnit(from: "count/min")
-            case .bloodGlucose:     HKUnit(from: "mg/dL")
-            case .systolicBP:       .millimeterOfMercury()
-            case .steps:            .count()
+            case .bloodGlucose: HKUnit(from: "mg/dL")
+            case .systolicBP: .millimeterOfMercury()
+            case .steps: .count()
             }
         }
 
@@ -90,16 +90,16 @@ enum HealthKitService {
     static func requestMedicationAuthorization() async -> Bool {
         guard isAvailable else { return false }
         #if targetEnvironment(simulator)
-        return false
-        #else
-        do {
-            for type in medicationReadTypes() {
-                try await store.requestPerObjectReadAuthorization(for: type, predicate: nil)
-            }
-            return true
-        } catch {
             return false
-        }
+        #else
+            do {
+                for type in medicationReadTypes() {
+                    try await store.requestPerObjectReadAuthorization(for: type, predicate: nil)
+                }
+                return true
+            } catch {
+                return false
+            }
         #endif
     }
 
@@ -154,7 +154,8 @@ enum HealthKitService {
     static func unarchiveConcept(_ string: String) -> HKHealthConceptIdentifier? {
         guard let data = Data(base64Encoded: string) else { return nil }
         return try? NSKeyedUnarchiver.unarchivedObject(
-            ofClass: HKHealthConceptIdentifier.self, from: data)
+            ofClass: HKHealthConceptIdentifier.self, from: data
+        )
     }
 
     // The user's medications as set up in Apple Health.
@@ -189,7 +190,7 @@ enum HealthKitService {
     struct InferredSchedule {
         let hour: Int
         let minute: Int
-        let weekdays: Set<Int>          // Calendar weekday values 1...7
+        let weekdays: Set<Int> // Calendar weekday values 1...7
         var isDaily: Bool { weekdays.count >= 7 }
     }
 
@@ -213,7 +214,7 @@ enum HealthKitService {
             store.execute(query)
         }
 
-        var byTime: [Int: Set<Int>] = [:]   // key = hour*60+minute → weekdays
+        var byTime: [Int: Set<Int>] = [:] // key = hour*60+minute → weekdays
         for event in events {
             guard event.scheduleType == .schedule,
                   event.medicationConceptIdentifier.isEqual(concept),
@@ -231,10 +232,10 @@ enum HealthKitService {
 
     private static func mappedStatus(_ status: HKMedicationDoseEvent.LogStatus) -> DoseStatus? {
         switch status {
-        case .taken:   return .taken
+        case .taken: return .taken
         case .snoozed: return .snoozed
         case .skipped: return .missed
-        default:       return nil   // notInteracted / notLogged / notificationNotSent → ignore
+        default: return nil // notInteracted / notLogged / notificationNotSent → ignore
         }
     }
 
@@ -282,12 +283,12 @@ enum HealthKitService {
             let eventMinutes = minutesOfDay(date, cal)
             let prescription = candidates.min {
                 timeDistance(minutesOfDay($0.0.scheduledTime, cal), eventMinutes) <
-                timeDistance(minutesOfDay($1.0.scheduledTime, cal), eventMinutes)
+                    timeDistance(minutesOfDay($1.0.scheduledTime, cal), eventMinutes)
             }!.0
 
             if let log = existing.first(where: {
                 $0.prescriptionId == prescription.id &&
-                cal.isDate($0.scheduledDate, equalTo: date, toGranularity: .minute)
+                    cal.isDate($0.scheduledDate, equalTo: date, toGranularity: .minute)
             }) {
                 if log.status != status || !log.isFromHealth {
                     log.status = status

@@ -15,6 +15,7 @@ struct RuledHeader: View {
             rule
         }
     }
+
     private var rule: some View {
         Rectangle().fill(Theme.inkFaded.opacity(0.4)).frame(height: 1)
     }

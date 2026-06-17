@@ -1,12 +1,12 @@
-import WidgetKit
-import SwiftUI
 import AppIntents
+import SwiftUI
+import WidgetKit
 
 // Widget content view. Lives in Shared so it can also be rendered in an in-app
 // preview gallery; the Widget configuration itself stays in the widget target.
 struct PrescriptionWidgetView: View {
     @Environment(\.widgetFamily) private var envFamily
-    var familyOverride: WidgetFamily? = nil   // DEBUG gallery only; widget uses the env value
+    var familyOverride: WidgetFamily? = nil // DEBUG gallery only; widget uses the env value
     let entry: DoseEntry
 
     private var family: WidgetFamily { familyOverride ?? envFamily }
@@ -19,7 +19,7 @@ struct PrescriptionWidgetView: View {
         switch family {
         case .systemSmall: smallView
         case .systemLarge: largeView
-        default:           mediumView
+        default: mediumView
         }
     }
 

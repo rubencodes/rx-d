@@ -1,7 +1,7 @@
-import WidgetKit
 import AppIntents
-import SwiftData
 import Foundation
+import SwiftData
+import WidgetKit
 
 struct NextDoseControlProvider: ControlValueProvider {
     var previewValue: NextDoseValue {
@@ -30,7 +30,7 @@ struct NextDoseControlProvider: ControlValueProvider {
             for date in ScheduleService.occurrences(for: p, on: now) {
                 let log = logs.first {
                     $0.prescriptionId == p.id &&
-                    cal.isDate($0.scheduledDate, equalTo: date, toGranularity: .minute)
+                        cal.isDate($0.scheduledDate, equalTo: date, toGranularity: .minute)
                 }
                 let status = log?.status ?? (date <= now ? .missed : .pending)
                 if status == .pending { pending.append((p, date)) }

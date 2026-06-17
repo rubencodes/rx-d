@@ -8,14 +8,14 @@ final class Prescription {
     var name: String = ""
     var scheduledTime: Date = Date()
     // Frequency stored as flat fields (SwiftData can't store associated-value enums)
-    var frequencyType: String = "daily"   // "daily" | "weekly"
-    var weeklyDays: [Int] = []            // empty for daily; Weekday.rawValue ints for weekly
-    var color: String = "#5B8DEF"         // hex string e.g. "#FF6B6B"
+    var frequencyType: String = "daily" // "daily" | "weekly"
+    var weeklyDays: [Int] = [] // empty for daily; Weekday.rawValue ints for weekly
+    var color: String = "#5B8DEF" // hex string e.g. "#FF6B6B"
     var notes: String?
     var isArchived: Bool = false
     var archivedAt: Date?
     var createdAt: Date = Date()
-    var followUpInterval: TimeInterval = 7200  // seconds; default 2hr
+    var followUpInterval: TimeInterval = 7200 // seconds; default 2hr
     // Set when imported from Apple Health: a base64 NSSecureCoding archive of the
     // HKHealthConceptIdentifier, used to match incoming HKMedicationDoseEvents.
     var healthConceptID: String?
@@ -28,22 +28,22 @@ final class Prescription {
         notes: String? = nil,
         followUpInterval: TimeInterval = 7200
     ) {
-        self.id = UUID()
+        id = UUID()
         self.name = name
         self.scheduledTime = scheduledTime
         self.color = color
         self.notes = notes
-        self.isArchived = false
-        self.archivedAt = nil
-        self.createdAt = Date()
+        isArchived = false
+        archivedAt = nil
+        createdAt = Date()
         self.followUpInterval = followUpInterval
         switch frequency {
         case .daily:
-            self.frequencyType = "daily"
-            self.weeklyDays = []
-        case .weekly(let days):
-            self.frequencyType = "weekly"
-            self.weeklyDays = days.map(\.rawValue).sorted()
+            frequencyType = "daily"
+            weeklyDays = []
+        case let .weekly(days):
+            frequencyType = "weekly"
+            weeklyDays = days.map(\.rawValue).sorted()
         }
     }
 
@@ -60,7 +60,7 @@ final class Prescription {
             case .daily:
                 frequencyType = "daily"
                 weeklyDays = []
-            case .weekly(let days):
+            case let .weekly(days):
                 frequencyType = "weekly"
                 weeklyDays = days.map(\.rawValue).sorted()
             }
