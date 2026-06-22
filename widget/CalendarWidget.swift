@@ -7,7 +7,6 @@ struct CalendarWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: CalendarProvider()) { entry in
             CalendarWidgetView(entry: entry)
-                .fontDesign(.serif)
                 .containerBackground(Theme.background, for: .widget)
         }
         .configurationDisplayName("Adherence Calendar")

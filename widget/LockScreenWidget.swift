@@ -12,7 +12,6 @@ struct LockScreenWidget: Widget {
             provider: WidgetProvider()
         ) { entry in
             LockScreenWidgetView(entry: entry)
-                .fontDesign(.serif)
                 .containerBackground(.clear, for: .widget)
         }
         .configurationDisplayName("Dose Status")

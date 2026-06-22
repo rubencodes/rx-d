@@ -12,7 +12,6 @@ struct PrescriptionWidget: Widget {
             provider: WidgetProvider()
         ) { entry in
             PrescriptionWidgetView(entry: entry)
-                .fontDesign(.serif)
                 .containerBackground(Theme.background, for: .widget)
         }
         .configurationDisplayName("Doses")

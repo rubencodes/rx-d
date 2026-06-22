@@ -77,7 +77,6 @@
             VStack(spacing: 8) {
                 Text(title).font(.caption).foregroundStyle(.white.opacity(0.7))
                 content()
-                    .fontDesign(.serif)
                     .padding(16)
                     .frame(width: w, height: h)
                     .background(Theme.background)
@@ -92,7 +91,6 @@
             VStack(spacing: 8) {
                 Text(title).font(.caption).foregroundStyle(.white.opacity(0.7))
                 content()
-                    .fontDesign(.serif)
                     .foregroundStyle(.white)
                     .padding(10)
                     .frame(width: w, height: h)
