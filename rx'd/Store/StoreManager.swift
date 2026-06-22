@@ -1,0 +1,72 @@
+import Foundation
+import StoreKit
+
+// The app's "Rex Pro" entitlement brain. The native StoreKit SwiftUI views
+// (ProductView / StoreView in PaywallView) own the purchase + restore UI; this type
+// just tracks whether Pro is unlocked and mirrors it into SharedDefaults so
+// notification/background code can gate features without touching StoreKit.
+// `Transaction.currentEntitlements` is the source of truth.
+@Observable
+@MainActor
+final class StoreManager {
+    static let shared = StoreManager()
+
+    static let proProductID = "codes.ruben.rx-d.pro"
+    /// Free tier allows this many active medications; Pro removes the cap.
+    static let freeMedicationLimit = 2
+
+    private(set) var isPro: Bool = SharedDefaults.shared.proUnlocked
+
+    private var updatesTask: Task<Void, Never>?
+
+    private init() {
+        updatesTask = observeTransactionUpdates()
+        Task { await refreshEntitlement() }
+    }
+
+    /// Whether a free user adding another medication would cross the limit.
+    func canAddMedication(activeCount: Int) -> Bool {
+        isPro || activeCount < Self.freeMedicationLimit
+    }
+
+    /// Recompute Pro from StoreKit's current entitlements. Cheap; safe to call often.
+    func refreshEntitlement() async {
+        var entitled = false
+        for await result in Transaction.currentEntitlements {
+            if case let .verified(transaction) = result,
+               transaction.productID == Self.proProductID,
+               transaction.revocationDate == nil {
+                entitled = true
+            }
+        }
+        setPro(entitled)
+    }
+
+    /// Handle the result delivered by a native view's `.onInAppPurchaseCompletion`:
+    /// finish the transaction and refresh the entitlement.
+    func process(_ result: Result<Product.PurchaseResult, any Error>) async {
+        if case let .success(.success(verification)) = result,
+           case let .verified(transaction) = verification {
+            await transaction.finish()
+        }
+        await refreshEntitlement()
+    }
+
+    private func setPro(_ value: Bool) {
+        isPro = value
+        SharedDefaults.shared.proUnlocked = value
+    }
+
+    // Catches transactions that arrive outside a purchase UI (renewals, another device,
+    // Ask to Buy approvals). Finishes them and refreshes Pro.
+    private func observeTransactionUpdates() -> Task<Void, Never> {
+        Task { [weak self] in
+            for await verification in Transaction.updates {
+                if case let .verified(transaction) = verification {
+                    await transaction.finish()
+                }
+                await self?.refreshEntitlement()
+            }
+        }
+    }
+}

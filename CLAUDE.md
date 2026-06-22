@@ -75,6 +75,15 @@ reinvent.
   `Color(hex:)`.
 - **Delight:** completion triggers `ConfettiBurst` + `Haptics` (both honor Reduce Motion).
 
+## Monetization — Rex Pro (freemium)
+
+- One-time **non-consumable** IAP, product id `codes.ruben.rx-d.pro` ($2.99). Free tier is fully functional; Pro unlocks extras.
+- **Gated features:** more than `StoreManager.freeMedicationLimit` (2) active medications; repeat-until-done reminders (`repeatRemindersUntilDone`); Apple Health (the whole Health tab); CSV export. The **primary dose reminder and core tracking are always free** — never gate the safety-critical basics (also an App Review risk for a health app).
+- `StoreManager` (`@Observable`, `@MainActor`, `.shared`) is the entitlement brain: it reads `Transaction.currentEntitlements`, listens to `Transaction.updates`, and mirrors `isPro` into `SharedDefaults.proUnlocked` so non-UI code can gate (e.g. `NotificationService` won't schedule the repeat series without it).
+- Views observe via `@State private var store = StoreManager.shared` (not `@Environment`) so it works in sheets without relying on environment propagation. The root `.environment(StoreManager.shared)` exists mainly to spin the singleton up (and its transaction listener) at launch.
+- **Purchase UI is native StoreKit** — `PaywallView` uses `ProductView` + `.storeButton(.visible, for: .restorePurchases)` + `.onInAppPurchaseCompletion`. Prefer these native views over hand-rolled buy/restore buttons.
+- Local testing: `Products.storekit` is referenced by the run scheme, so purchase/restore work in the simulator **when launched from Xcode** (a bare `simctl launch` won't apply it — `ProductView` shows a placeholder). Create the real product in App Store Connect before shipping.
+
 ## Identifiers
 
 - App Group: `group.codes.ruben.rx-d`
@@ -86,4 +95,4 @@ reinvent.
 
 `--seed`, `--tab <n>`, `--onboarding-step <n>`, `--all-done`, `--show-delete-alert`,
 `--show-archived-detail`, `--health-connected`, `--fake-vitals`, `--show-import`,
-`--confirm-dose`, `--widget-gallery`, `--prefill-name <name>`. Seeding logic is in `DebugSeed.swift`.
+`--confirm-dose`, `--widget-gallery`, `--show-paywall`, `--prefill-name <name>`. Seeding logic is in `DebugSeed.swift`.

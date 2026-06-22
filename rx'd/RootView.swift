@@ -9,6 +9,11 @@ struct RootView: View {
     @State private var showOnboarding = !SharedDefaults.shared.hasCompletedOnboarding
     @State private var doseToConfirm: PendingDose?
 
+    #if DEBUG
+        @State private var showDebugPaywall =
+            ProcessInfo.processInfo.arguments.contains("--show-paywall")
+    #endif
+
     var body: some View {
         Group {
             #if DEBUG
@@ -46,6 +51,9 @@ struct RootView: View {
         // Confirmation requested by the "Next Dose" Control Center control.
         .task { checkPendingConfirmation() }
         .onScenePhaseActive { checkPendingConfirmation() }
+        #if DEBUG
+        .sheet(isPresented: $showDebugPaywall) { PaywallView() }
+        #endif
         .alert(
             "Take Dose?",
             isPresented: Binding(get: { doseToConfirm != nil },

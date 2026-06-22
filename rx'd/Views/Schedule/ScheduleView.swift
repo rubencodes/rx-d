@@ -12,7 +12,9 @@ struct ScheduleView: View {
     private var archived: [Prescription]
 
     @Environment(\.modelContext) private var context
+    @State private var store = StoreManager.shared
     @State private var showAdd = false
+    @State private var showPaywall = false
     @State private var editTarget: Prescription?
     @State private var deleteTarget: Prescription?
     @State private var archivedDetail: Prescription?
@@ -62,13 +64,22 @@ struct ScheduleView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button { showAdd = true } label: {
+                    Button {
+                        if store.canAddMedication(activeCount: active.count) {
+                            showAdd = true
+                        } else {
+                            showPaywall = true
+                        }
+                    } label: {
                         Label("Add", systemImage: "plus")
                     }
                 }
             }
             .sheet(isPresented: $showAdd) {
                 AddEditPrescriptionView()
+            }
+            .sheet(isPresented: $showPaywall) {
+                PaywallView()
             }
             .sheet(item: $editTarget) { p in
                 AddEditPrescriptionView(prescription: p)

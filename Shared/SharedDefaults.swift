@@ -47,6 +47,16 @@ final class SharedDefaults {
         set { defaults.set(newValue, forKey: "hasCompletedOnboarding") }
     }
 
+    // MARK: - Rex Pro (in-app purchase)
+
+    // Cached entitlement so any process (notifications, background tasks) can gate Pro
+    // features without touching StoreKit. StoreManager is the source of truth and keeps
+    // this in sync; StoreKit's own entitlements are authoritative on the next launch.
+    var proUnlocked: Bool {
+        get { defaults.bool(forKey: "proUnlocked") }
+        set { defaults.set(newValue, forKey: "proUnlocked") }
+    }
+
     // MARK: - iCloud Sync
 
     // Off by default — requires the iCloud/CloudKit entitlement to be configured first.

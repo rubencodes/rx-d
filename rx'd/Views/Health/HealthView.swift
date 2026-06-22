@@ -7,6 +7,8 @@ struct HealthView: View {
     private var prescriptions: [Prescription]
     @Query private var allLogs: [DoseLog]
 
+    @State private var store = StoreManager.shared
+    @State private var showPaywall = false
     @State private var connected = HealthView.initialConnected()
     @State private var data: [HealthKitService.Vital: [Date: Double]] = [:]
     @State private var loading = false
@@ -42,7 +44,9 @@ struct HealthView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
-                    if !connected {
+                    if !store.isPro {
+                        proPrompt
+                    } else if !connected {
                         connectPrompt
                     } else {
                         importButton
@@ -74,8 +78,33 @@ struct HealthView: View {
             .tabNavigationTitle("Health")
             .task { await load() }
             .sheet(isPresented: $showImport) { ImportMedicationsView() }
+            .sheet(isPresented: $showPaywall) { PaywallView() }
             .onAppear { if HealthView.debugShowImport { showImport = true } }
         }
+    }
+
+    // MARK: - Pro upsell (Apple Health is a Rex Pro feature)
+
+    private var proPrompt: some View {
+        VStack(spacing: 16) {
+            PillBuddy(mood: .happy, topColor: Theme.gold, size: 96)
+                .padding(.top, 24)
+                .padding(.bottom, 4)
+            Text("Apple Health is part of Rex Pro")
+                .font(.title3.weight(.bold))
+                .foregroundStyle(Theme.ink)
+                .multilineTextAlignment(.center)
+            Text("Import the medications you've set up in Health, mirror doses you log there, and chart your vitals against the days you stay on schedule.")
+                .font(.subheadline)
+                .foregroundStyle(Theme.inkFaded)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 24)
+            Button("Unlock Rex Pro") { showPaywall = true }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .tint(Theme.accent)
+        }
+        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Connect prompt

@@ -21,6 +21,7 @@ struct rx_dApp: App {
         WindowGroup {
             RootView(container: container)
                 .modelContainer(container)
+                .environment(StoreManager.shared)
         }
     }
 }

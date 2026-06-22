@@ -3,6 +3,9 @@ import SwiftUI
 struct EnableHealthStep: View {
     let onComplete: () -> Void
 
+    @State private var store = StoreManager.shared
+    @State private var showPaywall = false
+
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
@@ -35,10 +38,14 @@ struct EnableHealthStep: View {
             Spacer()
 
             VStack(spacing: 12) {
-                Button("Connect Apple Health") {
-                    Task {
-                        await HealthKitService.requestAuthorization()
-                        onComplete()
+                Button(store.isPro ? "Connect Apple Health" : "Connect Apple Health (Rex Pro)") {
+                    if store.isPro {
+                        Task {
+                            await HealthKitService.requestAuthorization()
+                            onComplete()
+                        }
+                    } else {
+                        showPaywall = true
                     }
                 }
                 .buttonStyle(.borderedProminent)
@@ -53,6 +60,7 @@ struct EnableHealthStep: View {
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Theme.background.ignoresSafeArea())
+        .sheet(isPresented: $showPaywall) { PaywallView() }
     }
 
     private func benefit(_ icon: String, _ text: String) -> some View {

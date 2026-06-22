@@ -5,6 +5,8 @@ struct SettingsView: View {
     @Query private var allLogs: [DoseLog]
     @Query private var allPrescriptions: [Prescription]
     @Environment(\.modelContext) private var context
+    @State private var store = StoreManager.shared
+    @State private var showPaywall = false
 
     @AppStorage("quietHoursEnabled") private var quietHoursEnabled = false
     @State private var iCloudSyncEnabled = SharedDefaults.shared.iCloudSyncEnabled
@@ -45,8 +47,34 @@ struct SettingsView: View {
                     Text("Syncs your prescriptions and doses across your devices. Requires the iCloud capability to be enabled. Restart the app after changing this.")
                 }
 
+                Section {
+                    if store.isPro {
+                        Label("Rex Pro unlocked", systemImage: "checkmark.seal.fill")
+                            .foregroundStyle(Theme.accent)
+                    } else {
+                        Button {
+                            showPaywall = true
+                        } label: {
+                            HStack {
+                                Label("Unlock Rex Pro", systemImage: "sparkles")
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.caption).foregroundStyle(Theme.inkFaded)
+                            }
+                        }
+                    }
+                } header: {
+                    Text("Rex Pro")
+                } footer: {
+                    if !store.isPro {
+                        Text("Unlimited medications, repeat reminders, Apple Health, and CSV export.")
+                    }
+                }
+
                 Section("Data") {
-                    Button("Export CSV") { showExportOptions = true }
+                    Button("Export CSV") {
+                        if store.isPro { showExportOptions = true } else { showPaywall = true }
+                    }
                 }
 
                 Section {
@@ -82,6 +110,7 @@ struct SettingsView: View {
                     ShareSheet(url: url)
                 }
             }
+            .sheet(isPresented: $showPaywall) { PaywallView() }
         }
     }
 

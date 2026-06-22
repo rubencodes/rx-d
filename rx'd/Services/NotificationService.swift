@@ -124,9 +124,10 @@ enum NotificationService {
         ) { added += 1 }
 
         // Follow-ups are optional. When enabled: one nudge, or a capped repeating
-        // series gated on `repeatRemindersUntilDone`.
+        // series gated on `repeatRemindersUntilDone` (a Rex Pro feature — guarded here
+        // too so a lapsed entitlement can't keep scheduling the series).
         guard prescription.followUpEnabled else { return added }
-        let repeats = prescription.repeatRemindersUntilDone
+        let repeats = prescription.repeatRemindersUntilDone && SharedDefaults.shared.proUnlocked
         let count = repeats ? maxRepeatFollowUps : 1
         let doseDay = Calendar.current.startOfDay(for: date)
 

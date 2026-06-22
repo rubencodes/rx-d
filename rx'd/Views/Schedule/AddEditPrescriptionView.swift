@@ -16,6 +16,8 @@ struct AddEditPrescriptionView: View {
 
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
+    @State private var store = StoreManager.shared
+    @State private var showPaywall = false
 
     @Query(filter: #Predicate<Prescription> { !$0.isArchived })
     private var activePrescriptions: [Prescription]
@@ -115,7 +117,19 @@ struct AddEditPrescriptionView: View {
                             }
                         }
                         .pickerStyle(.menu)
-                        Toggle("Repeat until taken", isOn: $repeatUntilDone)
+                        if store.isPro {
+                            Toggle("Repeat until taken", isOn: $repeatUntilDone)
+                        } else {
+                            Button { showPaywall = true } label: {
+                                HStack {
+                                    Text("Repeat until taken").foregroundStyle(Theme.ink)
+                                    Spacer()
+                                    Label("Pro", systemImage: "lock.fill")
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundStyle(Theme.gold)
+                                }
+                            }
+                        }
                     } else {
                         Text(followUpFooter)
                             .font(.footnote)
@@ -175,6 +189,7 @@ struct AddEditPrescriptionView: View {
                 }
             }
             .onAppear { populate() }
+            .sheet(isPresented: $showPaywall) { PaywallView() }
         }
     }
 

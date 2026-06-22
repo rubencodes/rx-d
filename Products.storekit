@@ -1,0 +1,38 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "REX0PRO0CONFIG",
+  "nonRenewingSubscriptions" : [],
+  "products" : [
+    {
+      "displayPrice" : "2.99",
+      "familyShareable" : false,
+      "internalID" : "1",
+      "localizations" : [
+        {
+          "description" : "Unlock unlimited medications, repeat-until-done reminders, Apple Health, and CSV export.",
+          "displayName" : "Rex Pro",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "codes.ruben.rx-d.pro",
+      "referenceName" : "Rex Pro",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+  },
+  "subscriptionGroups" : [],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}
