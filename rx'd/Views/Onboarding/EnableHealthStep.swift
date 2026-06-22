@@ -20,7 +20,7 @@ struct EnableHealthStep: View {
                 VStack(alignment: .leading, spacing: 12) {
                     benefit("pills.fill", "Import your medications")
                     benefit("chart.xyaxis.line", "Chart vitals against adherence")
-                    benefit("lock.fill", "Read-only — rx'd never writes to Health")
+                    benefit("lock.fill", "Read-only — \(String.appName) never writes to Health")
                 }
                 .padding(16)
             }

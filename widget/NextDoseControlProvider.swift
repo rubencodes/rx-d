@@ -18,7 +18,7 @@ struct NextDoseControlProvider: ControlValueProvider {
         let now = Date()
         let cal = Calendar.current
         guard let container = try? ModelContainerFactory.makeSharedContainer() else {
-            return NextDoseValue(title: "rx'd", subtitle: "", prescriptionId: "", scheduledDate: 0, hasDose: false)
+            return NextDoseValue(title: .appName, subtitle: "", prescriptionId: "", scheduledDate: 0, hasDose: false)
         }
         let ctx = ModelContext(container)
         let prescriptions = (try? ctx.fetch(

@@ -6,7 +6,7 @@ import AppIntents
 // taps in Control Center silently changing data.
 struct ConfirmNextDoseIntent: AppIntent {
     static var title: LocalizedStringResource = "Take Next Dose"
-    static var description = IntentDescription("Opens rx'd to confirm taking your next dose.")
+    static var description = IntentDescription("Opens the app to confirm taking your next dose.")
     static var openAppWhenRun: Bool = true
 
     @Parameter(title: "Prescription ID") var prescriptionId: String

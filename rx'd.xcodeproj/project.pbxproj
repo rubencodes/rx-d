@@ -54,11 +54,21 @@
 			);
 			target = 4561FEDC2FD49DD000596CB8 /* widgetExtension */;
 		};
+		45F863982FE9EC7C0068811B /* Exceptions for "rx'd" folder in "widgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Shared/Extensions/String+Extension.swift",
+			);
+			target = 4561FEDC2FD49DD000596CB8 /* widgetExtension */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		4561FECD2FD49D4A00596CB8 /* rx'd */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				45F863982FE9EC7C0068811B /* Exceptions for "rx'd" folder in "widgetExtension" target */,
+			);
 			path = "rx'd";
 			sourceTree = "<group>";
 		};
@@ -393,6 +403,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "rx-d-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Rex;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "rx'd reads your medications and health metrics from Apple Health to import your prescriptions and show how your readings track with your doses.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
@@ -441,6 +452,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "rx-d-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Rex;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "rx'd reads your medications and health metrics from Apple Health to import your prescriptions and show how your readings track with your doses.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;

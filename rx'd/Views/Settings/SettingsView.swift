@@ -54,7 +54,7 @@ struct SettingsView: View {
                         Spacer()
                         VStack(spacing: 6) {
                             RxMonogram(size: 34)
-                            Text("rx'd")
+                            Text(verbatim: .appName)
                                 .font(.headline)
                                 .foregroundStyle(Theme.ink)
                             Text("Take care of yourself.")

@@ -24,7 +24,7 @@ struct ImportMedicationsView: View {
                     } else if medications.isEmpty {
                         emptyState
                     } else {
-                        Text("Pick medications to copy into rx'd. You can set times and reminders after importing.")
+                        Text("Pick medications to copy into \(String.appName). You can set times and reminders after importing.")
                             .font(.subheadline)
                             .foregroundStyle(Theme.inkFaded)
                             .frame(maxWidth: .infinity, alignment: .leading)

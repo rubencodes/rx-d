@@ -9,7 +9,7 @@ struct WelcomeStep: View {
             PillBuddy(mood: .happy, topColor: Theme.accent, size: 120)
             VStack(spacing: 10) {
                 RxMonogram(size: 30)
-                Text("rx'd")
+                Text(verbatim: .appName)
                     .font(.largeTitle.bold())
                     .foregroundStyle(Theme.ink)
             }
