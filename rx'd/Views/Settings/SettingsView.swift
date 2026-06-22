@@ -63,12 +63,19 @@ struct SettingsView: View {
                             }
                         }
                     }
+                    Button("Restore Purchases") {
+                        Task { await store.restore() }
+                    }
                 } header: {
                     Text("Rex Pro")
                 } footer: {
                     if !store.isPro {
                         Text("Unlimited medications, repeat reminders, Apple Health, and CSV export.")
                     }
+                }
+
+                Section("About") {
+                    Link("Privacy Policy", destination: URL(string: "https://ruben.codes/privacy")!)
                 }
 
                 Section("Data") {

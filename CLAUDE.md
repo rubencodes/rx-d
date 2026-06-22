@@ -77,7 +77,7 @@ reinvent.
 
 ## Monetization — Rex Pro (freemium)
 
-- One-time **non-consumable** IAP, product id `codes.ruben.rx-d.pro` ($2.99). Free tier is fully functional; Pro unlocks extras.
+- One-time **non-consumable** IAP, product id `RexPro` ($2.99) — defined once as `StoreManager.proProductID`. Free tier is fully functional; Pro unlocks extras.
 - **Gated features:** more than `StoreManager.freeMedicationLimit` (2) active medications; repeat-until-done reminders (`repeatRemindersUntilDone`); Apple Health (the whole Health tab); CSV export. The **primary dose reminder and core tracking are always free** — never gate the safety-critical basics (also an App Review risk for a health app).
 - `StoreManager` (`@Observable`, `@MainActor`, `.shared`) is the entitlement brain: it reads `Transaction.currentEntitlements`, listens to `Transaction.updates`, and mirrors `isPro` into `SharedDefaults.proUnlocked` so non-UI code can gate (e.g. `NotificationService` won't schedule the repeat series without it).
 - Views observe via `@State private var store = StoreManager.shared` (not `@Environment`) so it works in sheets without relying on environment propagation. The root `.environment(StoreManager.shared)` exists mainly to spin the singleton up (and its transaction listener) at launch.

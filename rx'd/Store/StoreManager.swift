@@ -11,7 +11,7 @@ import StoreKit
 final class StoreManager {
     static let shared = StoreManager()
 
-    static let proProductID = "codes.ruben.rx-d.pro"
+    static let proProductID = "RexPro"
     /// Free tier allows this many active medications; Pro removes the cap.
     static let freeMedicationLimit = 2
 
@@ -49,6 +49,13 @@ final class StoreManager {
            case let .verified(transaction) = verification {
             await transaction.finish()
         }
+        await refreshEntitlement()
+    }
+
+    /// Restore past purchases. The paywall uses the native restore store button; this
+    /// backs the explicit "Restore Purchases" entry in Settings.
+    func restore() async {
+        try? await AppStore.sync()
         await refreshEntitlement()
     }
 

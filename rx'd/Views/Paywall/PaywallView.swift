@@ -63,6 +63,13 @@ struct PaywallView: View {
                         .foregroundStyle(Theme.inkFaded)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 24)
+
+                    HStack(spacing: 18) {
+                        Link("Privacy Policy", destination: URL(string: "https://ruben.codes/privacy")!)
+                        Link("Terms of Use", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
+                    }
+                    .font(.caption2)
+                    .tint(Theme.accent)
                 }
                 .padding(20)
             }
