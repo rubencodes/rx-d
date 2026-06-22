@@ -25,8 +25,7 @@ struct TodayView: View {
             .frame(maxWidth: .infinity)
             .background(Theme.background.ignoresSafeArea())
             .overlay(ConfettiBurst(trigger: confettiTrigger, reduceMotion: reduceMotion))
-            .navigationTitle("Today")
-            .navigationBarTitleDisplayMode(.large)
+            .tabNavigationTitle("Today")
             .sheet(item: $selectedOccurrence) { occurrence in
                 DoseDetailView(occurrence: occurrence)
             }

@@ -71,7 +71,7 @@ struct SettingsView: View {
             .frame(maxWidth: .layoutWide)
             .frame(maxWidth: .infinity)
             .background(Theme.background.ignoresSafeArea())
-            .navigationTitle("Settings")
+            .tabNavigationTitle("Settings")
             .confirmationDialog("Export Scope", isPresented: $showExportOptions, titleVisibility: .visible) {
                 Button("All Time") { export(scope: .allTime) }
                 Button("This Month") { export(scope: .thisMonth) }

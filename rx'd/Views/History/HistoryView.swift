@@ -17,7 +17,7 @@ struct HistoryView: View {
             .frame(maxWidth: .layoutWide)
             .frame(maxWidth: .infinity)
             .background(Theme.background.ignoresSafeArea())
-            .navigationTitle("History")
+            .tabNavigationTitle("History")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button("Today") {

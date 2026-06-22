@@ -49,7 +49,7 @@ struct ScheduleView: View {
             .frame(maxWidth: .layoutWide)
             .frame(maxWidth: .infinity)
             .background(Theme.background.ignoresSafeArea())
-            .navigationTitle("Schedule")
+            .tabNavigationTitle("Schedule")
             .task {
                 #if DEBUG
                     if ProcessInfo.processInfo.arguments.contains("--show-delete-alert") {

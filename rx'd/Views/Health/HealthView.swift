@@ -71,7 +71,7 @@ struct HealthView: View {
             .frame(maxWidth: .layoutWide)
             .frame(maxWidth: .infinity)
             .background(Theme.background.ignoresSafeArea())
-            .navigationTitle("Health")
+            .tabNavigationTitle("Health")
             .task { await load() }
             .sheet(isPresented: $showImport) { ImportMedicationsView() }
             .onAppear { if HealthView.debugShowImport { showImport = true } }
