@@ -68,6 +68,8 @@ struct SettingsView: View {
                 }
             }
             .scrollContentBackground(.hidden)
+            .frame(maxWidth: .layoutWide)
+            .frame(maxWidth: .infinity)
             .background(Theme.background.ignoresSafeArea())
             .navigationTitle("Settings")
             .confirmationDialog("Export Scope", isPresented: $showExportOptions, titleVisibility: .visible) {

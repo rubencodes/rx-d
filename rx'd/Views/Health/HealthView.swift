@@ -68,6 +68,8 @@ struct HealthView: View {
                 }
                 .padding(16)
             }
+            .frame(maxWidth: .layoutWide)
+            .frame(maxWidth: .infinity)
             .background(Theme.background.ignoresSafeArea())
             .navigationTitle("Health")
             .task { await load() }

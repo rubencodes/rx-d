@@ -21,6 +21,8 @@ struct TodayView: View {
             TimelineView(.everyMinute) { context in
                 listContent(now: context.date)
             }
+            .frame(maxWidth: .layoutWide)
+            .frame(maxWidth: .infinity)
             .background(Theme.background.ignoresSafeArea())
             .overlay(ConfettiBurst(trigger: confettiTrigger, reduceMotion: reduceMotion))
             .navigationTitle("Today")

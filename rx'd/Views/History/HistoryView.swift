@@ -14,6 +14,8 @@ struct HistoryView: View {
                 allLogs: allLogs,
                 allPrescriptions: allPrescriptions
             )
+            .frame(maxWidth: .layoutWide)
+            .frame(maxWidth: .infinity)
             .background(Theme.background.ignoresSafeArea())
             .navigationTitle("History")
             .toolbar {

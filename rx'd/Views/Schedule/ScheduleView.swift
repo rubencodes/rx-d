@@ -46,6 +46,8 @@ struct ScheduleView: View {
                     .scrollContentBackground(.hidden)
                 }
             }
+            .frame(maxWidth: .layoutWide)
+            .frame(maxWidth: .infinity)
             .background(Theme.background.ignoresSafeArea())
             .navigationTitle("Schedule")
             .task {
