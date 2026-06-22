@@ -31,6 +31,7 @@ struct AddEditPrescriptionView: View {
     @State private var timeSensitive = true
     @State private var isSaving = false
 
+    private let notificationCenter: UNUserNotificationCenter = .current()
     private var isEditing: Bool { prescription != nil }
     private var isValid: Bool {
         !name.trimmingCharacters(in: .whitespaces).isEmpty &&
@@ -253,10 +254,9 @@ struct AddEditPrescriptionView: View {
         if requestsNotificationPermission {
             // Lazy permission request on first add from the normal (sheet) flow.
             Task {
-                let settings = await UNUserNotificationCenter.current().notificationSettings()
+                let settings = await notificationCenter.notificationSettings()
                 if settings.authorizationStatus == .notDetermined {
-                    try? await UNUserNotificationCenter.current()
-                        .requestAuthorization(options: [.alert, .sound, .badge])
+                    _ = try? await notificationCenter.requestAuthorization(options: [.alert, .sound, .badge])
                 }
                 let all = (try? context.fetch(
                     FetchDescriptor<Prescription>(predicate: #Predicate { !$0.isArchived })

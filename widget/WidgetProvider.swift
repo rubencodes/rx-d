@@ -11,7 +11,6 @@ struct WidgetProvider: AppIntentTimelineProvider {
         await makeEntry(for: configuration)
     }
 
-    @MainActor
     func timeline(for configuration: PrescriptionSelectionIntent, in _: Context) async -> Timeline<DoseEntry> {
         let entry = await makeEntry(for: configuration)
 

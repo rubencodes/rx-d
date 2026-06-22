@@ -3,7 +3,9 @@ import UserNotifications
 
 struct EnableNotificationsStep: View {
     let onComplete: () -> Void
+
     @State private var requested = false
+    private let notificationCenter: UNUserNotificationCenter = .current()
 
     var body: some View {
         VStack(spacing: 28) {
@@ -36,8 +38,7 @@ struct EnableNotificationsStep: View {
             VStack(spacing: 12) {
                 Button("Turn On Reminders") {
                     Task {
-                        try? await UNUserNotificationCenter.current()
-                            .requestAuthorization(options: [.alert, .sound, .badge])
+                        _ = try? await notificationCenter.requestAuthorization(options: [.alert, .sound, .badge])
                         onComplete()
                     }
                 }

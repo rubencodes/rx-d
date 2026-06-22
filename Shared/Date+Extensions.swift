@@ -4,7 +4,7 @@ import Foundation
 // instances are safe to share across actors. Marked nonisolated(unsafe) because the
 // project defaults to MainActor isolation but these helpers are used from the widget
 // and AppIntent (nonisolated) contexts too.
-private nonisolated(unsafe) let isoDateFormatter: DateFormatter = {
+private let isoDateFormatter: DateFormatter = {
     let f = DateFormatter()
     f.dateFormat = "yyyy-MM-dd"
     f.locale = Locale(identifier: "en_US_POSIX")
@@ -12,7 +12,7 @@ private nonisolated(unsafe) let isoDateFormatter: DateFormatter = {
     return f
 }()
 
-private nonisolated(unsafe) let isoTimeFormatter: DateFormatter = {
+private let isoTimeFormatter: DateFormatter = {
     let f = DateFormatter()
     f.dateFormat = "HH:mm:ss"
     f.locale = Locale(identifier: "en_US_POSIX")
@@ -20,7 +20,7 @@ private nonisolated(unsafe) let isoTimeFormatter: DateFormatter = {
     return f
 }()
 
-private nonisolated(unsafe) let hhmmFormatter: DateFormatter = {
+private let hhmmFormatter: DateFormatter = {
     let f = DateFormatter()
     f.dateFormat = "HH:mm"
     f.locale = Locale(identifier: "en_US_POSIX")
