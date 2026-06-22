@@ -6,6 +6,8 @@
 	<array>
 		<string>codes.ruben.rx-d.refresh</string>
 	</array>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
