@@ -16,6 +16,13 @@ final class Prescription {
     var archivedAt: Date?
     var createdAt: Date = Date()
     var followUpInterval: TimeInterval = 7200 // seconds; default 2hr
+    // When true, the follow-up reminder repeats every `followUpInterval` (a capped
+    // series of nudges) until the dose is acted on, instead of firing just once.
+    var repeatRemindersUntilDone: Bool = false
+    // When true, reminders use the .timeSensitive interruption level so they break
+    // through Focus / Do Not Disturb (not the hardware silent switch — that needs the
+    // Critical Alerts entitlement). Requires the Time Sensitive Notifications capability.
+    var timeSensitive: Bool = true
     // Set when imported from Apple Health: a base64 NSSecureCoding archive of the
     // HKHealthConceptIdentifier, used to match incoming HKMedicationDoseEvents.
     var healthConceptID: String?
@@ -26,7 +33,9 @@ final class Prescription {
         frequency: Frequency = .daily,
         color: String = "#5B8DEF",
         notes: String? = nil,
-        followUpInterval: TimeInterval = 7200
+        followUpInterval: TimeInterval = 7200,
+        repeatRemindersUntilDone: Bool = false,
+        timeSensitive: Bool = true
     ) {
         id = UUID()
         self.name = name
@@ -37,6 +46,8 @@ final class Prescription {
         archivedAt = nil
         createdAt = Date()
         self.followUpInterval = followUpInterval
+        self.repeatRemindersUntilDone = repeatRemindersUntilDone
+        self.timeSensitive = timeSensitive
         switch frequency {
         case .daily:
             frequencyType = "daily"

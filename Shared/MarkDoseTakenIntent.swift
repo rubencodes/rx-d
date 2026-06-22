@@ -44,12 +44,15 @@ struct MarkDoseTakenIntent: AppIntent {
         }
         try? context.save()
 
-        // Cancel the follow-up notification for this occurrence
-        let dateStr = date.isoDateString
-        let timeStr = date.hhmmString
-        let followUpId = "\(pid)-\(dateStr)-\(timeStr)-followup"
-        UNUserNotificationCenter.current()
-            .removePendingNotificationRequests(withIdentifiers: [followUpId])
+        // Cancel the whole reminder series for this occurrence (primary + any
+        // follow-ups). Done inline rather than via NotificationService because this
+        // intent also runs in the widget extension, which doesn't compile that service.
+        let prefix = "\(pid)-\(date.isoDateString)-\(date.hhmmString)-"
+        let center = UNUserNotificationCenter.current()
+        let pending = await center.pendingNotificationRequests()
+        center.removePendingNotificationRequests(
+            withIdentifiers: pending.map(\.identifier).filter { $0.hasPrefix(prefix) }
+        )
 
         return .result()
     }

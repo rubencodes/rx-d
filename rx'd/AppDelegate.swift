@@ -32,14 +32,12 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         }
 
         let scheduledDate = Date(timeIntervalSince1970: scheduledInterval)
-        let followUpId = userInfo["followUpId"] as? String
 
         Task {
             await handleAction(
                 response.actionIdentifier,
                 prescriptionId: prescriptionId,
-                scheduledDate: scheduledDate,
-                followUpId: followUpId
+                scheduledDate: scheduledDate
             )
             completionHandler()
         }
@@ -48,8 +46,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     private func handleAction(
         _ identifier: String,
         prescriptionId: UUID,
-        scheduledDate: Date,
-        followUpId: String?
+        scheduledDate: Date
     ) async {
         guard let container = try? ModelContainerFactory.makeSharedContainer() else { return }
         let context = ModelContext(container)
@@ -75,9 +72,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
                 ))
             }
             try? context.save()
-            if let fid = followUpId {
-                NotificationService.cancelFollowUp(id: fid)
-            }
+            // Clear the whole reminder series for this occurrence (primary + follow-ups).
+            NotificationService.cancelOccurrence(prescriptionId: prescriptionId, scheduledDate: scheduledDate)
 
         case "SNOOZE":
             let logs = (try? context.fetch(FetchDescriptor<DoseLog>())) ?? []

@@ -27,6 +27,8 @@ struct AddEditPrescriptionView: View {
     @State private var color = "#5B8DEF"
     @State private var notes = ""
     @State private var followUpInterval: TimeInterval = 7200
+    @State private var repeatUntilDone = false
+    @State private var timeSensitive = true
     @State private var isSaving = false
 
     private var isEditing: Bool { prescription != nil }
@@ -51,6 +53,10 @@ struct AddEditPrescriptionView: View {
         ("2 hours", 7200),
         ("4 hours", 14400),
     ]
+
+    private var currentIntervalLabel: String {
+        followUpOptions.first { $0.seconds == followUpInterval }?.label ?? "a while"
+    }
 
     let colorOptions = [
         "#5B8DEF", "#FF6B6B", "#51CF66", "#FAB005",
@@ -88,13 +94,28 @@ struct AddEditPrescriptionView: View {
                     }
                 }
 
-                Section("Follow-up Reminder") {
-                    Picker("After", selection: $followUpInterval) {
+                Section {
+                    Picker(repeatUntilDone ? "Every" : "After", selection: $followUpInterval) {
                         ForEach(followUpOptions, id: \.seconds) { opt in
                             Text(opt.label).tag(opt.seconds)
                         }
                     }
                     .pickerStyle(.menu)
+                    Toggle("Repeat until taken", isOn: $repeatUntilDone)
+                } header: {
+                    Text("Follow-up Reminder")
+                } footer: {
+                    Text(repeatUntilDone
+                        ? "Nudges you every \(currentIntervalLabel) until you mark the dose taken (capped at a few reminders)."
+                        : "Reminds you once if the dose still hasn't been taken.")
+                }
+
+                Section {
+                    Toggle("Time-Sensitive Alerts", isOn: $timeSensitive)
+                } header: {
+                    Text("Alerts")
+                } footer: {
+                    Text("Time-sensitive alerts break through Focus and Do Not Disturb. They don't override the silent switch.")
                 }
 
                 Section("Color") {
@@ -184,6 +205,8 @@ struct AddEditPrescriptionView: View {
         color = p.color
         notes = p.notes ?? ""
         followUpInterval = p.followUpInterval
+        repeatUntilDone = p.repeatRemindersUntilDone
+        timeSensitive = p.timeSensitive
         switch p.frequency {
         case .daily:
             isDaily = true
@@ -208,6 +231,8 @@ struct AddEditPrescriptionView: View {
             p.color = color
             p.notes = notes.isEmpty ? nil : notes
             p.followUpInterval = followUpInterval
+            p.repeatRemindersUntilDone = repeatUntilDone
+            p.timeSensitive = timeSensitive
         } else {
             let p = Prescription(
                 name: name,
@@ -215,7 +240,9 @@ struct AddEditPrescriptionView: View {
                 frequency: frequency,
                 color: color,
                 notes: notes.isEmpty ? nil : notes,
-                followUpInterval: followUpInterval
+                followUpInterval: followUpInterval,
+                repeatRemindersUntilDone: repeatUntilDone,
+                timeSensitive: timeSensitive
             )
             context.insert(p)
         }

@@ -4,6 +4,10 @@ import UserNotifications
 enum NotificationService {
     static let maxPending = 60 // keep 4 slots free for snooze notifications
     static let daysAhead = 7
+    // Cap for the "repeat until done" follow-up series, per occurrence. The OS limits
+    // total pending requests (see maxPending), so an unbounded "every hour forever"
+    // isn't possible — we schedule this many nudges and cancel them when the dose is taken.
+    static let maxRepeatFollowUps = 4
 
     // Re-register all notification categories. Call at launch.
     static func registerCategories() {
@@ -58,26 +62,27 @@ enum NotificationService {
                             cal.isDate($0.scheduledDate, equalTo: date, toGranularity: .minute)
                     }
                     if alreadyTaken { continue }
-                    await schedule(prescription: prescription, at: date, center: center)
-                    scheduled += 2 // primary + follow-up
+                    let added = await schedule(
+                        prescription: prescription, at: date,
+                        budget: maxPending - scheduled, center: center
+                    )
+                    scheduled += added
                 }
             }
         }
     }
 
-    // Cancel both the primary and follow-up reminders for a single occurrence. Used
-    // when a dose is marked taken from inside the app (tap/swipe in Today, or the
-    // Control Center confirmation), which otherwise wouldn't clear the pending
-    // follow-up reminder until the next full reschedule.
+    // Cancel every pending reminder for a single occurrence — the primary and the
+    // whole follow-up series (one-shot or "repeat until done"). Used when a dose is
+    // marked taken from anywhere (notification DONE, widget intent, in-app tap/swipe,
+    // Control Center confirm). Matches by id prefix so it covers any number of repeats.
     static func cancelOccurrence(prescriptionId: UUID, scheduledDate: Date) {
-        let dateStr = scheduledDate.isoDateString
-        let timeStr = scheduledDate.hhmmString
-        let ids = [
-            "\(prescriptionId)-\(dateStr)-\(timeStr)-primary",
-            "\(prescriptionId)-\(dateStr)-\(timeStr)-followup",
-        ]
-        UNUserNotificationCenter.current()
-            .removePendingNotificationRequests(withIdentifiers: ids)
+        let prefix = "\(prescriptionId)-\(scheduledDate.isoDateString)-\(scheduledDate.hhmmString)-"
+        let center = UNUserNotificationCenter.current()
+        center.getPendingNotificationRequests { requests in
+            let ids = requests.map(\.identifier).filter { $0.hasPrefix(prefix) }
+            center.removePendingNotificationRequests(withIdentifiers: ids)
+        }
     }
 
     static func cancelNotifications(for prescription: Prescription) {
@@ -90,51 +95,65 @@ enum NotificationService {
         }
     }
 
-    static func cancelFollowUp(id: String) {
-        UNUserNotificationCenter.current()
-            .removePendingNotificationRequests(withIdentifiers: [id])
-    }
-
     // MARK: - Private
 
+    // Schedules the primary reminder plus its follow-up(s) for one occurrence, without
+    // exceeding `budget` pending requests. Returns how many it actually added.
+    @discardableResult
     private static func schedule(
         prescription: Prescription,
         at date: Date,
+        budget: Int,
         center: UNUserNotificationCenter
-    ) async {
+    ) async -> Int {
+        guard budget > 0 else { return 0 }
         let dateStr = date.isoDateString
         let timeStr = date.hhmmString
-        let primaryId = "\(prescription.id)-\(dateStr)-\(timeStr)-primary"
-        let followUpId = "\(prescription.id)-\(dateStr)-\(timeStr)-followup"
+        let base = "\(prescription.id)-\(dateStr)-\(timeStr)"
+        var added = 0
 
-        let primaryDate = adjustForQuietHours(date)
-        let followUpDate = adjustForQuietHours(
-            date.addingTimeInterval(prescription.followUpInterval)
-        )
-
-        await scheduleNotification(
-            id: primaryId,
+        if await scheduleNotification(
+            id: "\(base)-primary",
             title: prescription.name,
             body: "Time to take your dose.",
-            at: primaryDate,
+            at: adjustForQuietHours(date),
             prescriptionId: prescription.id.uuidString,
             scheduledDate: date.timeIntervalSince1970,
-            followUpId: followUpId,
+            timeSensitive: prescription.timeSensitive,
             center: center
-        )
+        ) { added += 1 }
 
-        await scheduleNotification(
-            id: followUpId,
-            title: prescription.name,
-            body: "Don't forget your dose!",
-            at: followUpDate,
-            prescriptionId: prescription.id.uuidString,
-            scheduledDate: date.timeIntervalSince1970,
-            followUpId: nil,
-            center: center
-        )
+        // One follow-up, or a capped repeating series gated on `repeatRemindersUntilDone`.
+        let repeats = prescription.repeatRemindersUntilDone
+        let count = repeats ? maxRepeatFollowUps : 1
+        let doseDay = Calendar.current.startOfDay(for: date)
+
+        for n in 1 ... count {
+            if added >= budget { break }
+            let fireDate = adjustForQuietHours(
+                date.addingTimeInterval(prescription.followUpInterval * Double(n))
+            )
+            // Keep a repeating series within the dose's own day — don't nag overnight or
+            // across the quiet-hours gap into the next morning.
+            if repeats, Calendar.current.startOfDay(for: fireDate) != doseDay { break }
+            // A single follow-up keeps the legacy id; a series is suffixed -followup-N.
+            let fid = count == 1 ? "\(base)-followup" : "\(base)-followup-\(n)"
+            if await scheduleNotification(
+                id: fid,
+                title: prescription.name,
+                body: "Don't forget your dose!",
+                at: fireDate,
+                prescriptionId: prescription.id.uuidString,
+                scheduledDate: date.timeIntervalSince1970,
+                timeSensitive: prescription.timeSensitive,
+                center: center
+            ) { added += 1 }
+        }
+        return added
     }
 
+    // Returns true if a request was actually scheduled (i.e. the fire date is in the future).
+    @discardableResult
     private static func scheduleNotification(
         id: String,
         title: String,
@@ -142,22 +161,27 @@ enum NotificationService {
         at date: Date,
         prescriptionId: String,
         scheduledDate: TimeInterval,
-        followUpId: String?,
+        timeSensitive: Bool,
         center: UNUserNotificationCenter
-    ) async {
-        guard date > Date() else { return }
+    ) async -> Bool {
+        guard date > Date() else { return false }
 
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
         content.categoryIdentifier = "DOSE_REMINDER"
         content.sound = .default
-        var info: [String: Any] = [
+        // Group all of a medication's reminders (primary + the whole follow-up series,
+        // across occurrences) into one collapsible stack in Notification Center.
+        content.threadIdentifier = prescriptionId
+        // .timeSensitive breaks through Focus / Do Not Disturb (requires the Time
+        // Sensitive Notifications capability). It does NOT override the silent switch —
+        // that needs the Critical Alerts entitlement.
+        content.interruptionLevel = timeSensitive ? .timeSensitive : .active
+        content.userInfo = [
             "prescriptionId": prescriptionId,
             "scheduledDate": scheduledDate,
         ]
-        if let fid = followUpId { info["followUpId"] = fid }
-        content.userInfo = info
 
         let components = Calendar.current.dateComponents(
             [.year, .month, .day, .hour, .minute],
@@ -166,6 +190,7 @@ enum NotificationService {
         let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
         let request = UNNotificationRequest(identifier: id, content: content, trigger: trigger)
         try? await center.add(request)
+        return true
     }
 
     private static func adjustForQuietHours(_ date: Date) -> Date {
