@@ -90,6 +90,7 @@ struct AddEditPrescriptionView: View {
                         .foregroundStyle(.orange)
                     }
                 }
+                .animation(.spring, value: isDuplicateName)
 
                 Section("Schedule") {
                     DatePicker("Time", selection: $scheduledTime, displayedComponents: .hourAndMinute)
@@ -104,9 +105,9 @@ struct AddEditPrescriptionView: View {
                         weekdayPicker
                     }
                 }
+                .animation(.spring, value: isDaily)
 
                 Section {
-                    Toggle("Follow-up Reminder", isOn: $followUpEnabled)
                     if followUpEnabled {
                         Picker(repeatUntilDone ? "Every" : "After", selection: $followUpInterval) {
                             ForEach(followUpOptions, id: \.seconds) { opt in
@@ -115,12 +116,22 @@ struct AddEditPrescriptionView: View {
                         }
                         .pickerStyle(.menu)
                         Toggle("Repeat until taken", isOn: $repeatUntilDone)
+                    } else {
+                        Text(followUpFooter)
+                            .font(.footnote)
+                            .foregroundStyle(.placeholder)
                     }
                 } header: {
-                    Text("Follow-up Reminder")
+                    Toggle(isOn: $followUpEnabled) {
+                        Text("Follow-up Reminder")
+                            .fontWeight(.semibold)
+                    }
                 } footer: {
-                    Text(followUpFooter)
+                    if followUpEnabled {
+                        Text(followUpFooter)
+                    }
                 }
+                .animation(.spring, value: followUpEnabled)
 
                 Section {
                     Toggle("Time-Sensitive Alerts", isOn: $timeSensitive)
@@ -129,6 +140,7 @@ struct AddEditPrescriptionView: View {
                 } footer: {
                     Text("Time-sensitive alerts break through Focus and Do Not Disturb. They don't override the silent switch.")
                 }
+                .animation(.spring, value: timeSensitive)
 
                 Section("Color") {
                     colorPicker
