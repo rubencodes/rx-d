@@ -35,8 +35,10 @@ Bundle id `codes.ruben.rx-d`, deployment target iOS 26.5.
 
 ## Notifications
 
-- On marking a dose taken from anywhere (notification DONE, widget intent, in-app tap/swipe, Control Center confirm), cancel that occurrence's pending reminders — use `NotificationService.cancelOccurrence(prescriptionId:scheduledDate:)`.
-- `NotificationService.rescheduleAll(prescriptions:logs:)` removes **all** pending requests first, then reschedules — so always pass the full active prescription set **and** the logs (it skips already-taken occurrences). Never call it with a single prescription.
+- On marking a dose taken from anywhere (notification DONE, widget intent, in-app tap/swipe, Control Center confirm), cancel that occurrence's pending reminders — use `NotificationService.cancelOccurrence(prescriptionId:scheduledDate:)`. It matches request ids by the `"<pid>-<date>-<time>-"` prefix, so it clears the primary **and** the whole follow-up series. (`MarkDoseTakenIntent` lives in `Shared/` and runs in the widget process, which can't see `NotificationService`, so it inlines the same prefix cancellation.)
+- Per-occurrence ids: `<pid>-<yyyy-MM-dd>-<HH:mm>-primary`, `-followup` (one-shot) or `-followup-N` (the `repeatRemindersUntilDone` series, capped at `maxRepeatFollowUps`, kept within the dose's own day).
+- `NotificationService.rescheduleAll(prescriptions:logs:)` removes **all** pending requests first, then reschedules — so always pass the full active prescription set **and** the logs (it skips already-taken occurrences). Never call it with a single prescription. It honors a `maxPending` budget (the OS caps pending requests at 64).
+- `Prescription.timeSensitive` sets `interruptionLevel = .timeSensitive` (breaks through Focus/DND). It requires the **Time Sensitive Notifications** capability (`com.apple.developer.usernotifications.time-sensitive` in `rxd.entitlements`). Overriding the hardware **silent switch** needs the **Critical Alerts** entitlement, which Apple grants only by special request — not currently held.
 - BGTask id `codes.ruben.rx-d.refresh` must stay listed in `BGTaskSchedulerPermittedIdentifiers` in `rx-d-Info.plist`, or registration is rejected.
 
 ## HealthKit (iOS 26 Medications API)
@@ -61,8 +63,10 @@ reinvent.
 - **Tokens** (`Theme.swift`): `background`/`surface`/`surfaceAlt`, `accent` (green), `oxblood`
   (℞ red), `gold`, `ink`/`inkFaded`, status colors (`taken` green / `pending` sepia / `snoozed`
   gold / `missed` oxblood), `cardCornerRadius`, and `rx` (the `\u{211E}` ℞ glyph).
-- **Type:** apply `.fontDesign(.serif)` (system serif / New York). The ℞ is the Unicode glyph in
-  serif — not a bundled font.
+- **Type:** the app and widgets use the **default system font** (not serif). The only serif is the
+  ℞ glyph inside `RxMonogram` (`design: .serif`, the Unicode `\u{211E}` character — not a bundled
+  font). Don't apply `.fontDesign(.serif)` to whole views; widgets previously did and looked out of
+  place against the app.
 - **Components:** `LabelCard` (double-ruled cream "prescription label" card), `RuledHeader`
   (small-caps title between rules), `StatusStamp` (tilted ink stamp; for a future dose it reads
   SOON/LATER, not "DUE"), `RxMonogram`, `PillBuddy` (shape-drawn amber-bottle mascot, no assets),
