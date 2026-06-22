@@ -28,17 +28,17 @@ private let hhmmFormatter: DateFormatter = {
     return f
 }()
 
-private nonisolated(unsafe) let iso8601Formatter: ISO8601DateFormatter = {
+private let iso8601Formatter: ISO8601DateFormatter = {
     let f = ISO8601DateFormatter()
     f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
     return f
 }()
 
 extension Date {
-    nonisolated var isoDateString: String { isoDateFormatter.string(from: self) }
-    nonisolated var isoTimeString: String { isoTimeFormatter.string(from: self) }
-    nonisolated var hhmmString: String { hhmmFormatter.string(from: self) }
-    nonisolated var iso8601String: String { iso8601Formatter.string(from: self) }
+    var isoDateString: String { isoDateFormatter.string(from: self) }
+    var isoTimeString: String { isoTimeFormatter.string(from: self) }
+    var hhmmString: String { hhmmFormatter.string(from: self) }
+    var iso8601String: String { iso8601Formatter.string(from: self) }
 
     // Returns a Date representing this date at the time-of-day encoded in `time`
     nonisolated func settingTime(from time: Date) -> Date {
