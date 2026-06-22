@@ -1,5 +1,6 @@
 import SwiftUI
 
+@available(iOS 26, *)
 struct EnableHealthStep: View {
     let onComplete: () -> Void
 

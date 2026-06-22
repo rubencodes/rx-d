@@ -3,6 +3,7 @@ import SwiftUI
 
 // Lists medications the user set up in Apple Health and imports them as rx'd
 // prescriptions (read-only copy; links via healthConceptID for dose-event mirroring).
+@available(iOS 26, *)
 struct ImportMedicationsView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss

@@ -111,7 +111,10 @@ struct RootView: View {
         NotificationService.cancelOccurrence(prescriptionId: dose.prescriptionId,
                                              scheduledDate: dose.date)
         WidgetCenter.shared.reloadAllTimelines()
-        ControlCenter.shared.reloadControls(ofKind: "codes.ruben.rx-d.NextDose")
+
+        if #available(iOS 18, *) {
+            ControlCenter.shared.reloadControls(ofKind: "codes.ruben.rx-d.NextDose")
+        }
     }
 
     private func rescheduleAndAutoMiss() async {
@@ -122,7 +125,7 @@ struct RootView: View {
             print("Auto-miss pass failed: \(error)")
         }
         // Mirror any doses the user logged in Apple Health (read-only Health → rx'd).
-        if SharedDefaults.shared.healthConnected {
+        if SharedDefaults.shared.healthConnected, #available(iOS 26, *) {
             await HealthKitService.mirrorDoseEvents(into: context)
         }
 

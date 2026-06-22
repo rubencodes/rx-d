@@ -26,12 +26,22 @@ struct OnboardingFlow: View {
         case 1:
             AddFirstPrescriptionStep { step = 2 }
         case 2:
-            EnableNotificationsStep(onComplete: { step = 3 })
+            EnableNotificationsStep {
+                guard #available(iOS 26, *) else {
+                    SharedDefaults.shared.hasCompletedOnboarding = true
+                    onComplete()
+                    return
+                }
+
+                step = 3
+            }
         default:
-            EnableHealthStep(onComplete: {
-                SharedDefaults.shared.hasCompletedOnboarding = true
-                onComplete()
-            })
+            if #available(iOS 26, *) {
+                EnableHealthStep {
+                    SharedDefaults.shared.hasCompletedOnboarding = true
+                    onComplete()
+                }
+            }
         }
     }
 }

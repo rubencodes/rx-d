@@ -14,8 +14,10 @@ struct RootTabView: View {
             Tab("History", systemImage: "clock.arrow.circlepath", value: 2) {
                 HistoryView()
             }
-            Tab("Health", systemImage: "heart.text.square", value: 3) {
-                HealthView()
+            if #available(iOS 26, *) {
+                Tab("Health", systemImage: "heart.text.square", value: 3) {
+                    HealthView()
+                }
             }
             Tab("Settings", systemImage: "gear", value: 4) {
                 SettingsView()

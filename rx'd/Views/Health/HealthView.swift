@@ -2,6 +2,7 @@ import Charts
 import SwiftData
 import SwiftUI
 
+@available(iOS 26, *)
 struct HealthView: View {
     @Query(filter: #Predicate<Prescription> { !$0.isArchived })
     private var prescriptions: [Prescription]

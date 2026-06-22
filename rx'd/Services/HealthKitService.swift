@@ -4,6 +4,7 @@ import SwiftData
 
 // Wraps all Apple Health access. Reads only — rx'd never writes to Health.
 // (The iOS 26 Medications API is read-only for dose events anyway.)
+@available(iOS 26, *)
 @MainActor
 enum HealthKitService {
     static let store = HKHealthStore()
