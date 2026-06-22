@@ -123,7 +123,9 @@ enum NotificationService {
             center: center
         ) { added += 1 }
 
-        // One follow-up, or a capped repeating series gated on `repeatRemindersUntilDone`.
+        // Follow-ups are optional. When enabled: one nudge, or a capped repeating
+        // series gated on `repeatRemindersUntilDone`.
+        guard prescription.followUpEnabled else { return added }
         let repeats = prescription.repeatRemindersUntilDone
         let count = repeats ? maxRepeatFollowUps : 1
         let doseDay = Calendar.current.startOfDay(for: date)

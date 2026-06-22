@@ -15,6 +15,8 @@ final class Prescription {
     var isArchived: Bool = false
     var archivedAt: Date?
     var createdAt: Date = Date()
+    // When false, only the primary reminder fires — no follow-up at all.
+    var followUpEnabled: Bool = true
     var followUpInterval: TimeInterval = 7200 // seconds; default 2hr
     // When true, the follow-up reminder repeats every `followUpInterval` (a capped
     // series of nudges) until the dose is acted on, instead of firing just once.
@@ -33,6 +35,7 @@ final class Prescription {
         frequency: Frequency = .daily,
         color: String = "#5B8DEF",
         notes: String? = nil,
+        followUpEnabled: Bool = true,
         followUpInterval: TimeInterval = 7200,
         repeatRemindersUntilDone: Bool = false,
         timeSensitive: Bool = true
@@ -45,6 +48,7 @@ final class Prescription {
         isArchived = false
         archivedAt = nil
         createdAt = Date()
+        self.followUpEnabled = followUpEnabled
         self.followUpInterval = followUpInterval
         self.repeatRemindersUntilDone = repeatRemindersUntilDone
         self.timeSensitive = timeSensitive

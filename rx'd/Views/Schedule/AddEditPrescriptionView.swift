@@ -26,6 +26,7 @@ struct AddEditPrescriptionView: View {
     @State private var selectedDays: Set<Weekday> = []
     @State private var color = "#5B8DEF"
     @State private var notes = ""
+    @State private var followUpEnabled = true
     @State private var followUpInterval: TimeInterval = 7200
     @State private var repeatUntilDone = false
     @State private var timeSensitive = true
@@ -57,6 +58,15 @@ struct AddEditPrescriptionView: View {
 
     private var currentIntervalLabel: String {
         followUpOptions.first { $0.seconds == followUpInterval }?.label ?? "a while"
+    }
+
+    private var followUpFooter: String {
+        if !followUpEnabled {
+            return "Only the reminder at the scheduled time fires — no follow-up."
+        }
+        return repeatUntilDone
+            ? "Nudges you every \(currentIntervalLabel) until you mark the dose taken (capped at a few reminders)."
+            : "Reminds you once if the dose still hasn't been taken."
     }
 
     let colorOptions = [
@@ -96,19 +106,20 @@ struct AddEditPrescriptionView: View {
                 }
 
                 Section {
-                    Picker(repeatUntilDone ? "Every" : "After", selection: $followUpInterval) {
-                        ForEach(followUpOptions, id: \.seconds) { opt in
-                            Text(opt.label).tag(opt.seconds)
+                    Toggle("Follow-up Reminder", isOn: $followUpEnabled)
+                    if followUpEnabled {
+                        Picker(repeatUntilDone ? "Every" : "After", selection: $followUpInterval) {
+                            ForEach(followUpOptions, id: \.seconds) { opt in
+                                Text(opt.label).tag(opt.seconds)
+                            }
                         }
+                        .pickerStyle(.menu)
+                        Toggle("Repeat until taken", isOn: $repeatUntilDone)
                     }
-                    .pickerStyle(.menu)
-                    Toggle("Repeat until taken", isOn: $repeatUntilDone)
                 } header: {
                     Text("Follow-up Reminder")
                 } footer: {
-                    Text(repeatUntilDone
-                        ? "Nudges you every \(currentIntervalLabel) until you mark the dose taken (capped at a few reminders)."
-                        : "Reminds you once if the dose still hasn't been taken.")
+                    Text(followUpFooter)
                 }
 
                 Section {
@@ -205,6 +216,7 @@ struct AddEditPrescriptionView: View {
         scheduledTime = p.scheduledTime
         color = p.color
         notes = p.notes ?? ""
+        followUpEnabled = p.followUpEnabled
         followUpInterval = p.followUpInterval
         repeatUntilDone = p.repeatRemindersUntilDone
         timeSensitive = p.timeSensitive
@@ -231,6 +243,7 @@ struct AddEditPrescriptionView: View {
             p.frequency = frequency
             p.color = color
             p.notes = notes.isEmpty ? nil : notes
+            p.followUpEnabled = followUpEnabled
             p.followUpInterval = followUpInterval
             p.repeatRemindersUntilDone = repeatUntilDone
             p.timeSensitive = timeSensitive
@@ -241,6 +254,7 @@ struct AddEditPrescriptionView: View {
                 frequency: frequency,
                 color: color,
                 notes: notes.isEmpty ? nil : notes,
+                followUpEnabled: followUpEnabled,
                 followUpInterval: followUpInterval,
                 repeatRemindersUntilDone: repeatUntilDone,
                 timeSensitive: timeSensitive
