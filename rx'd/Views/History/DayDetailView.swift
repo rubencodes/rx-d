@@ -46,6 +46,8 @@ struct DayDetailView: View {
                     Text("No doses scheduled")
                         .foregroundStyle(.secondary)
                         .padding(16)
+                        .frame(maxWidth: .infinity)
+                        .multilineTextAlignment(.center)
                 } else {
                     ForEach(occurrences) { occ in
                         Divider()

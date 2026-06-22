@@ -16,6 +16,8 @@ struct CalendarDayCellView: View {
             }
             if isToday && !isSelected {
                 Circle().strokeBorder(Theme.oxblood, lineWidth: 1.5)
+            } else {
+                Circle().fill(.clear)
             }
 
             Text(day.formatted(.dateTime.day()))
@@ -25,6 +27,9 @@ struct CalendarDayCellView: View {
                 .minimumScaleFactor(0.6)
         }
         .frame(minHeight: 38)
+        .animation(.spring, value: isSelected)
+        .animation(.spring, value: adherence.total)
+        .animation(.spring, value: isToday)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityLabel)
         .accessibilityAddTraits(accessibilityTraits)
