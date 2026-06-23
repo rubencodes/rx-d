@@ -7,7 +7,6 @@ enum StreakService {
     static func computeAndCache(prescriptions: [Prescription], logs: [DoseLog]) -> Int {
         let streak = compute(prescriptions: prescriptions, logs: logs)
         SharedDefaults.shared.streakCache = streak
-        SharedDefaults.shared.streakLastComputedDate = Date()
         return streak
     }
 

@@ -15,6 +15,4 @@ struct ScheduledOccurrence: Identifiable {
     func effectiveStatus(asOf now: Date) -> DoseStatus {
         doseLog?.status ?? (scheduledDate <= now ? .missed : .pending)
     }
-
-    var isPast: Bool { scheduledDate < Date() }
 }

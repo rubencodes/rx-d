@@ -35,11 +35,6 @@ final class SharedDefaults {
         set { defaults.set(newValue, forKey: "streakCache") }
     }
 
-    var streakLastComputedDate: Date? {
-        get { defaults.object(forKey: "streakLastComputedDate") as? Date }
-        set { defaults.set(newValue, forKey: "streakLastComputedDate") }
-    }
-
     // MARK: - Onboarding
 
     var hasCompletedOnboarding: Bool {

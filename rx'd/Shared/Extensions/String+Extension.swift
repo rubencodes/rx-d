@@ -10,9 +10,3 @@ extension String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ?? ""
     }
 }
-
-extension String.LocalizationValue {
-    static var appName: Self {
-        .init(stringLiteral: .appName)
-    }
-}
