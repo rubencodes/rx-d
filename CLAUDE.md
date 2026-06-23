@@ -45,7 +45,7 @@ Bundle id `codes.ruben.rx-d`, deployment target iOS 26.5.
 
 - Request **vitals** auth and **medication** auth separately. Folding medication types into a bulk `requestAuthorization(toShare:read:)` throws an **uncatchable** Obj-C exception. Medication types require per-object auth (`requestPerObjectReadAuthorization`), which returns a catchable Swift error.
 - Medication auth is unsupported on the Simulator (guarded with `#if targetEnvironment(simulator)`).
-- Read-only: rx'd never writes to Health.
+- Read-only: rx'd never writes to Health. **But the HealthKit entitlement still requires BOTH purpose strings** — `NSHealthShareUsageDescription` *and* `NSHealthUpdateUsageDescription` (set as `INFOPLIST_KEY_NSHealth*UsageDescription` build settings). Missing the Update one passes local build/run but fails App Store delivery with **ITMS-90683** (surfaced only in Apple's email / the build's Invalid status — Xcode Cloud shows a useless "Preparing build for App Store Connect failed").
 
 ## Widgets & accessibility
 

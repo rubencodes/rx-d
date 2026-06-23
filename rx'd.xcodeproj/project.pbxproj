@@ -412,7 +412,8 @@
 				INFOPLIST_FILE = "rx-d-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Rex;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "rx'd reads your medications and health metrics from Apple Health to import your prescriptions and show how your readings track with your doses.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "$(INFOPLIST_KEY_CFBundleDisplayName) reads your medications and health metrics from Apple Health to import your prescriptions and show how your readings track with your doses.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "$(INFOPLIST_KEY_CFBundleDisplayName) is read-only and never writes data to Apple Health.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -463,7 +464,8 @@
 				INFOPLIST_FILE = "rx-d-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Rex;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "rx'd reads your medications and health metrics from Apple Health to import your prescriptions and show how your readings track with your doses.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "$(INFOPLIST_KEY_CFBundleDisplayName) reads your medications and health metrics from Apple Health to import your prescriptions and show how your readings track with your doses.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "$(INFOPLIST_KEY_CFBundleDisplayName) is read-only and never writes data to Apple Health.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
