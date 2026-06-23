@@ -11,6 +11,10 @@ Bundle id `codes.ruben.rx-d`, deployment target iOS 26.5.
 - **Trust `xcodebuild`, not the in-editor SourceKit diagnostics.** SourceKit constantly reports false "Cannot find 'Theme'/'Prescription' in scope" and "'main' attribute cannot be used…" errors for files in the synchronized groups. If `xcodebuild` says BUILD SUCCEEDED, the code is fine.
 - After splitting/refactoring across files, prefer a clean build if results look stale: incremental builds sometimes don't recompile (this masked a HealthView rewrite once).
 
+## Versioning
+
+- **`Version.xcconfig`** (repo root) is the single source of truth for `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION`. It's wired as the **project-level** base configuration, so the app and widget both inherit it — bump the version/build there, not per-target. (Don't re-add `MARKETING_VERSION`/`CURRENT_PROJECT_VERSION` to a target's build settings; a target-level value would override the xcconfig.)
+
 ## Project structure conventions
 
 - **One type per file.** One view per file; generally one model/enum/intent/service per file too. Name the file after the type. Small `private` helpers that exist solely to back one parent (e.g. a private `ViewModifier` behind a `View` extension, nested types) may stay with that parent.
