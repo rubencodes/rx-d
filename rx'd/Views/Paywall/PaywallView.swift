@@ -7,6 +7,7 @@ import StoreKit
 // Dismisses itself once Pro is unlocked.
 struct PaywallView: View {
     @State private var store = StoreManager.shared
+    @State private var restoring = false
     @Environment(\.dismiss) private var dismiss
 
     private let features: [(icon: String, title: String, detail: String)] = [
@@ -58,6 +59,23 @@ struct PaywallView: View {
                     .padding(14)
                     .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.cardCornerRadius))
 
+                    Button {
+                        Task {
+                            restoring = true
+                            await store.restore()
+                            restoring = false
+                        }
+                    } label: {
+                        if restoring {
+                            ProgressView()
+                        } else {
+                            Text("Restore Purchase")
+                        }
+                    }
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(Theme.accent)
+                    .disabled(restoring)
+
                     Text("Pro is a one-time purchase — no subscription. Everything you've already set up stays free.")
                         .font(.caption2)
                         .foregroundStyle(Theme.inkFaded)
@@ -76,8 +94,6 @@ struct PaywallView: View {
             .background(Theme.background.ignoresSafeArea())
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
-            // Native restore control (App Store requires a restore path).
-            .storeButton(.visible, for: .restorePurchases)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Close") { dismiss() }
