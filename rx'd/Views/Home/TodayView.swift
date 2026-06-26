@@ -40,21 +40,23 @@ struct TodayView: View {
         let done = total > 0 && taken == total
 
         List {
-            Section {
-                header(now: now, taken: taken, total: total, done: done,
-                       isEmpty: occurrences.isEmpty, next: nextPending(occurrences, now: now))
-                    .listRowInsets(.init(top: 8, leading: 16, bottom: 4, trailing: 16))
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-            }
-
             if occurrences.isEmpty {
+                // The empty state carries its own message, so the summary header would
+                // just be redundant — show only the empty state.
                 Section {
                     emptyState
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                 }
             } else {
+                Section {
+                    header(now: now, taken: taken, total: total, done: done,
+                           isEmpty: false, next: nextPending(occurrences, now: now))
+                        .listRowInsets(.init(top: 8, leading: 16, bottom: 4, trailing: 16))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                }
+
                 Section {
                     ForEach(occurrences) { occurrence in
                         let status = occurrence.effectiveStatus(asOf: now)
