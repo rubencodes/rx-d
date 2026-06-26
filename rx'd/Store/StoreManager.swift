@@ -42,14 +42,26 @@ final class StoreManager {
         setPro(entitled)
     }
 
-    /// Handle the result delivered by a native view's `.onInAppPurchaseCompletion`:
-    /// finish the transaction and refresh the entitlement.
+    /// Handle the result delivered by a native view's `.onInAppPurchaseCompletion`.
     func process(_ result: Result<Product.PurchaseResult, any Error>) async {
-        if case let .success(.success(verification)) = result,
-           case let .verified(transaction) = verification {
-            await transaction.finish()
+        if case let .success(.success(.verified(transaction))) = result {
+            await apply(transaction)
+        } else {
+            await refreshEntitlement()
         }
-        await refreshEntitlement()
+    }
+
+    // Grant entitlement straight from a verified transaction. Granting from the
+    // transaction itself — rather than immediately re-querying currentEntitlements —
+    // avoids a race where the just-completed purchase isn't yet reflected there, which
+    // would leave Pro stuck off right after buying.
+    private func apply(_ transaction: Transaction) async {
+        await transaction.finish()
+        if transaction.productID == Self.proProductID, transaction.revocationDate == nil {
+            setPro(true)
+        } else {
+            await refreshEntitlement()
+        }
     }
 
     /// Restore past purchases. The paywall uses the native restore store button; this
@@ -68,11 +80,12 @@ final class StoreManager {
     // Ask to Buy approvals). Finishes them and refreshes Pro.
     private func observeTransactionUpdates() -> Task<Void, Never> {
         Task { [weak self] in
-            for await verification in Transaction.updates {
-                if case let .verified(transaction) = verification {
-                    await transaction.finish()
+            for await update in Transaction.updates {
+                if case let .verified(transaction) = update {
+                    await self?.apply(transaction)
+                } else {
+                    await self?.refreshEntitlement()
                 }
-                await self?.refreshEntitlement()
             }
         }
     }

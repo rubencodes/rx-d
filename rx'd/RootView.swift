@@ -50,7 +50,12 @@ struct RootView: View {
         }
         // Confirmation requested by the "Next Dose" Control Center control.
         .task { checkPendingConfirmation() }
-        .onScenePhaseActive { checkPendingConfirmation() }
+        .onScenePhaseActive {
+            checkPendingConfirmation()
+            // Reconcile Rex Pro on foreground, in case a purchase or restore happened
+            // elsewhere (another device, or a flow that didn't update us directly).
+            Task { await StoreManager.shared.refreshEntitlement() }
+        }
         #if DEBUG
         .sheet(isPresented: $showDebugPaywall) { PaywallView() }
         #endif
