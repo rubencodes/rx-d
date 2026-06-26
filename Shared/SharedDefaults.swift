@@ -55,9 +55,12 @@ final class SharedDefaults {
     // MARK: - iCloud Sync
 
     // Off by default — requires the iCloud/CloudKit entitlement to be configured first.
+    // Stored in the Keychain (not App Group defaults) so it survives delete + reinstall:
+    // otherwise a sync-on user who reinstalls would silently drop back to a local store
+    // even though their data is still in CloudKit.
     var iCloudSyncEnabled: Bool {
-        get { defaults.bool(forKey: "iCloudSyncEnabled") }
-        set { defaults.set(newValue, forKey: "iCloudSyncEnabled") }
+        get { KeychainStore.bool(forKey: "iCloudSyncEnabled") }
+        set { KeychainStore.set(newValue, forKey: "iCloudSyncEnabled") }
     }
 
     // Whether the user connected Apple Health *vitals* (from the Health tab).
