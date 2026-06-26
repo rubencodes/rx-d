@@ -39,6 +39,8 @@ struct AddEditPrescriptionView: View {
     // Medications API, and HealthKitService, are iOS 26+).
     @State private var healthSuggestions: [MedSuggestion] = []
     @State private var selectedHealthConceptID: String?
+    @State private var healthMedicationsRequested = SharedDefaults.shared.healthMedicationsRequested
+    @State private var healthTipDismissed = SharedDefaults.shared.healthTipDismissed
 
     private let notificationCenter: UNUserNotificationCenter = .current()
     private var isEditing: Bool { prescription != nil }
@@ -85,31 +87,32 @@ struct AddEditPrescriptionView: View {
     var body: some View {
         NavigationStack {
             Form {
-                if !isEditing, !healthSuggestions.isEmpty {
-                    Section {
+                if !isEditing {
+                    healthSection
+                }
+
+                Section {
+                    TextField("e.g. Morning Vitamins", text: $name)
+                        .autocorrectionDisabled()
+                        .autocapitalization(.words)
+
+                    if healthSuggestions.isEmpty == false {
                         ForEach(healthSuggestions) { suggestion in
                             Button {
                                 Task { await applySuggestion(suggestion) }
                             } label: {
                                 HStack(spacing: 12) {
                                     RxMonogram(size: 26, color: Theme.accent)
-                                    Text(suggestion.name).foregroundStyle(Theme.ink)
+                                    Text(suggestion.name)
+                                        .foregroundStyle(Theme.inkFaded)
                                     Spacer()
                                     Image(systemName: selectedHealthConceptID == suggestion.archivedID
-                                        ? "checkmark.circle.fill" : "arrow.down.circle")
+                                        ? "checkmark.circle.fill" : "arrow.up.circle")
                                         .foregroundStyle(Theme.accent)
                                 }
                             }
                         }
-                    } header: {
-                        Text("From Apple Health")
-                    } footer: {
-                        Text("Tap a medication you take to fill in its details.")
                     }
-                }
-
-                Section {
-                    TextField("e.g. Morning Vitamins", text: $name)
                 } header: {
                     Text("Name")
                 } footer: {
@@ -223,6 +226,76 @@ struct AddEditPrescriptionView: View {
         }
     }
 
+    // Apple Health area on the Add screen, above Name. Two states:
+    // • not requested, tip not dismissed → a dismissible "Connect Apple Health" tip
+    // • not requested, tip dismissed → a compact "Connect Apple Health" CTA
+    // Only shown on iOS 26 with HealthKit available.
+    @ViewBuilder private var healthSection: some View {
+        if #available(iOS 26, *), HealthKitService.isAvailable, healthMedicationsRequested {
+            if healthTipDismissed {
+                Section {
+                    Button {
+                        Task {
+                            await connectHealthMedications()
+                        }
+                    } label: {
+                        Label("Connect Apple Health", systemImage: "heart.text.square")
+                            .foregroundStyle(Theme.accent)
+                    }
+                    .listRowBackground(
+                        RoundedRectangle(cornerRadius: 24)
+                            .fill(.thinMaterial)
+                            .shadow(radius: 4)
+                    )
+                }
+            } else {
+                Section {
+                    healthTip
+                        .listRowBackground(
+                            RoundedRectangle(cornerRadius: 24)
+                                .fill(.thinMaterial)
+                                .shadow(radius: 4)
+                        )
+                }
+            }
+        }
+    }
+
+    private var healthTip: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "heart.text.square")
+                .font(.title3)
+                .foregroundStyle(Theme.accent)
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Connect Apple Health")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Theme.ink)
+                Text("Already have your medications setup in Apple Health? Tap Connect to make importing them easy.")
+                    .font(.caption)
+                    .foregroundStyle(Theme.inkFaded)
+                Button("Connect") {
+                    Task {
+                        await connectHealthMedications()
+                    }
+                }
+                .font(.caption.weight(.semibold))
+                .buttonStyle(.bordered)
+                .tint(Theme.accent)
+                .padding(.top, 2)
+            }
+            Spacer(minLength: 0)
+            Button {
+                healthTipDismissed = true
+                SharedDefaults.shared.healthTipDismissed = true
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.inkFaded)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
     private var weekdayPicker: some View {
         HStack {
             ForEach(Weekday.allCases) { day in
@@ -292,13 +365,24 @@ struct AddEditPrescriptionView: View {
     private func loadHealthSuggestions() async {
         guard !isEditing else { return }
         if #available(iOS 26, *) {
-            guard HealthKitService.isAvailable, SharedDefaults.shared.healthConnected else { return }
+            guard HealthKitService.isAvailable, healthMedicationsRequested else { return }
             let meds = await HealthKitService.fetchMedications()
             let imported = Set(activePrescriptions.compactMap(\.healthConceptID))
             healthSuggestions = meds
                 .filter { !imported.contains($0.archivedID) }
                 .map { MedSuggestion(name: $0.name, archivedID: $0.archivedID) }
         }
+    }
+
+    // Request Apple Health *medication* access (only) from the Add screen's tip/CTA,
+    // then load suggestions. Kept separate from the Health tab's vitals request — asking
+    // for both back-to-back was unreliable.
+    private func connectHealthMedications() async {
+        guard #available(iOS 26, *) else { return }
+        await HealthKitService.requestMedicationAuthorization()
+        healthMedicationsRequested = true
+        SharedDefaults.shared.healthMedicationsRequested = true
+        await loadHealthSuggestions()
     }
 
     // Prefill the form from a Health medication — name, the schedule inferred from its

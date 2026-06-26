@@ -12,6 +12,8 @@ struct RootView: View {
     #if DEBUG
         @State private var showDebugPaywall =
             ProcessInfo.processInfo.arguments.contains("--show-paywall")
+        @State private var showDebugAdd =
+            ProcessInfo.processInfo.arguments.contains("--show-add")
     #endif
 
     var body: some View {
@@ -58,6 +60,7 @@ struct RootView: View {
         }
         #if DEBUG
         .sheet(isPresented: $showDebugPaywall) { PaywallView() }
+        .sheet(isPresented: $showDebugAdd) { AddEditPrescriptionView() }
         #endif
         .alert(
             "Take Dose?",
@@ -130,7 +133,8 @@ struct RootView: View {
             print("Auto-miss pass failed: \(error)")
         }
         // Mirror any doses the user logged in Apple Health (read-only Health → rx'd).
-        if SharedDefaults.shared.healthConnected, #available(iOS 26, *) {
+        // Requires medication access (reads dose events), which is separate from vitals.
+        if SharedDefaults.shared.healthMedicationsRequested, #available(iOS 26, *) {
             await HealthKitService.mirrorDoseEvents(into: context)
         }
 

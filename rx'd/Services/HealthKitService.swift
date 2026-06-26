@@ -64,13 +64,6 @@ enum HealthKitService {
         Set(Vital.allCases.map { $0.quantityType })
     }
 
-    // Medication read types (iOS 26). Requesting these can raise an Objective-C
-    // exception when unsupported/unentitled (e.g. the Simulator), so they're requested
-    // separately and guarded — never folded into the always-on vitals request.
-    static func medicationReadTypes() -> Set<HKObjectType> {
-        [HKObjectType.userAnnotatedMedicationType(), HKObjectType.medicationDoseEventType()]
-    }
-
     @discardableResult
     static func requestAuthorization() async -> Bool {
         guard isAvailable else { return false }
@@ -83,10 +76,12 @@ enum HealthKitService {
         }
     }
 
-    // Medication types require PER-OBJECT read authorization (the user picks which
-    // medications to share) — they're disallowed in the bulk requestAuthorization(),
-    // which raises an uncatchable Obj-C exception. The per-object API returns a
-    // catchable Swift error instead. Not supported on the Simulator, so skipped there.
+    // Medication access uses PER-OBJECT read authorization for the user-annotated
+    // medication type — the user picks which medications to share, which also grants
+    // access to those medications' dose events. Request ONLY the medication concept
+    // type: folding medication types into the bulk requestAuthorization() raises an
+    // uncatchable Obj-C exception, and so does requesting per-object auth for the
+    // dose-event type (which doesn't support it). Not supported on the Simulator.
     @discardableResult
     static func requestMedicationAuthorization() async -> Bool {
         guard isAvailable else { return false }
@@ -94,9 +89,9 @@ enum HealthKitService {
             return false
         #else
             do {
-                for type in medicationReadTypes() {
-                    try await store.requestPerObjectReadAuthorization(for: type, predicate: nil)
-                }
+                try await store.requestPerObjectReadAuthorization(
+                    for: HKObjectType.userAnnotatedMedicationType(), predicate: nil
+                )
                 return true
             } catch {
                 return false

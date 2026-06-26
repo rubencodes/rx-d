@@ -60,10 +60,25 @@ final class SharedDefaults {
         set { defaults.set(newValue, forKey: "iCloudSyncEnabled") }
     }
 
-    // Whether the user has connected Apple Health (tapped through the permission sheet).
+    // Whether the user connected Apple Health *vitals* (from the Health tab).
     var healthConnected: Bool {
         get { defaults.bool(forKey: "healthConnected") }
         set { defaults.set(newValue, forKey: "healthConnected") }
+    }
+
+    // Whether we've requested Apple Health *medication* read access (from the Add
+    // screen). HealthKit doesn't expose read-auth status, so this tracks "we've asked"
+    // — used to stop re-showing the connect tip and to gate dose-event mirroring.
+    var healthMedicationsRequested: Bool {
+        get { defaults.bool(forKey: "healthMedicationsRequested") }
+        set { defaults.set(newValue, forKey: "healthMedicationsRequested") }
+    }
+
+    // Whether the user dismissed the "Connect Apple Health" tip on the Add screen
+    // (after which it's replaced by a compact CTA instead of disappearing).
+    var healthTipDismissed: Bool {
+        get { defaults.bool(forKey: "healthTipDismissed") }
+        set { defaults.set(newValue, forKey: "healthTipDismissed") }
     }
 
     // MARK: - Control Center → in-app confirmation

@@ -120,7 +120,6 @@ struct HealthView: View {
             Button("Connect Apple Health") {
                 Task {
                     await HealthKitService.requestAuthorization()
-                    await HealthKitService.requestMedicationAuthorization()
                     connected = true
                     await load()
                 }

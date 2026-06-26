@@ -22,22 +22,11 @@ struct OnboardingFlow: View {
     var body: some View {
         switch step {
         case 0:
-            WelcomeStep {
-                // Connect Health before adding a medication so it can be imported.
-                // The Health step is iOS 26+ and only when HealthKit is available;
-                // otherwise skip straight to adding a medication.
-                if #available(iOS 26, *), HealthKitService.isAvailable {
-                    step = 1
-                } else {
-                    step = 2
-                }
-            }
+            WelcomeStep { step = 1 }
         case 1:
-            if #available(iOS 26, *), HealthKitService.isAvailable {
-                EnableHealthStep { step = 2 }
-            }
-        case 2:
-            AddFirstPrescriptionStep { step = 3 }
+            // Apple Health is connected later — from a tip on the Add screen (medications)
+            // and the Health tab (vitals) — so onboarding stays short.
+            AddFirstPrescriptionStep { step = 2 }
         default:
             EnableNotificationsStep {
                 SharedDefaults.shared.hasCompletedOnboarding = true

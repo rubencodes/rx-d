@@ -47,8 +47,10 @@ Bundle id `codes.ruben.rx-d`, deployment target iOS 26.5.
 
 ## HealthKit (iOS 26 Medications API)
 
-- Request **vitals** auth and **medication** auth separately. Folding medication types into a bulk `requestAuthorization(toShare:read:)` throws an **uncatchable** Obj-C exception. Medication types require per-object auth (`requestPerObjectReadAuthorization`), which returns a catchable Swift error.
+- Request **vitals** auth and **medication** auth separately, and **never back-to-back** — two consecutive HealthKit permission requests was unreliable. Vitals auth is requested from the **Health tab** (`requestAuthorization`); medication auth from the **Add screen's "Connect Apple Health" tip** (`requestMedicationAuthorization`). Tracked by `SharedDefaults.healthConnected` (vitals) and `healthMedicationsRequested` (meds) respectively.
+- Folding medication types into a bulk `requestAuthorization(toShare:read:)` throws an **uncatchable** Obj-C exception. Medication uses per-object auth (`requestPerObjectReadAuthorization`) for **only** `userAnnotatedMedicationType()` — requesting it for `medicationDoseEventType()` *also* raises that uncatchable exception (sharing a medication already grants its dose events).
 - Medication auth is unsupported on the Simulator (guarded with `#if targetEnvironment(simulator)`).
+- Importing meds is free (suggested on the Add screen); the Add-screen tip is dismissible (collapses to a compact CTA via `SharedDefaults.healthTipDismissed`). Reading vitals/charting them is Rex Pro.
 - Read-only: rx'd never writes to Health. **But the HealthKit entitlement still requires BOTH purpose strings** — `NSHealthShareUsageDescription` *and* `NSHealthUpdateUsageDescription` (set as `INFOPLIST_KEY_NSHealth*UsageDescription` build settings). Missing the Update one passes local build/run but fails App Store delivery with **ITMS-90683** (surfaced only in Apple's email / the build's Invalid status — Xcode Cloud shows a useless "Preparing build for App Store Connect failed").
 
 ## Widgets & accessibility
@@ -82,7 +84,7 @@ reinvent.
 ## Monetization — Rex Pro (freemium)
 
 - One-time **non-consumable** IAP, product id `RexPro` ($2.99) — defined once as `StoreManager.proProductID`. Free tier is fully functional; Pro unlocks extras.
-- **Gated features:** more than `StoreManager.freeMedicationLimit` (2) active medications; repeat-until-done reminders (`repeatRemindersUntilDone`); Apple Health (the whole Health tab); CSV export. The **primary dose reminder and core tracking are always free** — never gate the safety-critical basics (also an App Review risk for a health app).
+- **Gated features:** more than `StoreManager.freeMedicationLimit` (2) active medications; repeat-until-done reminders (`repeatRemindersUntilDone`); Apple Health **vitals charts** (importing meds from Health is **free**); CSV export. The **primary dose reminder and core tracking are always free** — never gate the safety-critical basics (also an App Review risk for a health app).
 - `StoreManager` (`@Observable`, `@MainActor`, `.shared`) is the entitlement brain: it reads `Transaction.currentEntitlements`, listens to `Transaction.updates`, and mirrors `isPro` into `SharedDefaults.proUnlocked` so non-UI code can gate (e.g. `NotificationService` won't schedule the repeat series without it).
 - Views observe via `@State private var store = StoreManager.shared` (not `@Environment`) so it works in sheets without relying on environment propagation. The root `.environment(StoreManager.shared)` exists mainly to spin the singleton up (and its transaction listener) at launch.
 - **Purchase UI is native StoreKit** — `PaywallView` uses `ProductView` + `.storeButton(.visible, for: .restorePurchases)` + `.onInAppPurchaseCompletion`. Prefer these native views over hand-rolled buy/restore buttons.
@@ -99,4 +101,4 @@ reinvent.
 
 `--seed`, `--tab <n>`, `--onboarding-step <n>`, `--all-done`, `--show-delete-alert`,
 `--show-archived-detail`, `--health-connected`, `--fake-vitals`,
-`--confirm-dose`, `--widget-gallery`, `--show-paywall`, `--prefill-name <name>`. Seeding logic is in `DebugSeed.swift`.
+`--confirm-dose`, `--widget-gallery`, `--show-paywall`, `--show-add`, `--prefill-name <name>`. Seeding logic is in `DebugSeed.swift`.
