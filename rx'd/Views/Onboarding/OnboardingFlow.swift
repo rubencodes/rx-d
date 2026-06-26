@@ -6,6 +6,9 @@ struct OnboardingFlow: View {
 
     @State private var step = initialStep()
     @Environment(\.modelContext) private var context
+    // Returning users (restored from the surviving store or synced via iCloud) already
+    // have prescriptions, so we skip the "add your first medication" step for them.
+    @Query private var prescriptions: [Prescription]
 
     private static func initialStep() -> Int {
         #if DEBUG
@@ -22,7 +25,9 @@ struct OnboardingFlow: View {
     var body: some View {
         switch step {
         case 0:
-            WelcomeStep { step = 1 }
+            // Skip the add-medication step if the user already has prescriptions
+            // (e.g. data restored on reinstall or synced from iCloud).
+            WelcomeStep { step = prescriptions.isEmpty ? 1 : 2 }
         case 1:
             // Apple Health is connected later — from a tip on the Add screen (medications)
             // and the Health tab (vitals) — so onboarding stays short.
