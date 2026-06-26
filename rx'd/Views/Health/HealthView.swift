@@ -36,31 +36,28 @@ struct HealthView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
-                    if !connected {
+                    if !store.isPro {
+                        // Vitals charting is Rex Pro — show the paywall before asking for
+                        // Health permission (don't request access only to hit a paywall).
+                        // Importing medications is free, from the Add Medication screen.
+                        vitalsProPrompt
+                    } else if !connected {
                         connectPrompt
+                    } else if loading {
+                        ProgressView().frame(maxWidth: .infinity, minHeight: 200)
                     } else {
-                        // Vitals charting is Rex Pro; medications are imported from the
-                        // Add Medication screen (suggested there from Apple Health).
-                        if store.isPro {
-                            if loading {
-                                ProgressView().frame(maxWidth: .infinity, minHeight: 200)
-                            } else {
-                                // Charts with data first, legend shown once.
-                                if !withData.isEmpty {
-                                    legend
-                                    ForEach(withData) { chartCard(for: $0) }
-                                } else {
-                                    noDataHero
-                                }
-                                // Data-less vitals, collapsed.
-                                if !withoutData.isEmpty {
-                                    RuledHeader(title: "No recent data")
-                                        .padding(.top, 4)
-                                    ForEach(withoutData) { collapsedRow($0) }
-                                }
-                            }
+                        // Charts with data first, legend shown once.
+                        if !withData.isEmpty {
+                            legend
+                            ForEach(withData) { chartCard(for: $0) }
                         } else {
-                            vitalsProPrompt
+                            noDataHero
+                        }
+                        // Data-less vitals, collapsed.
+                        if !withoutData.isEmpty {
+                            RuledHeader(title: "No recent data")
+                                .padding(.top, 4)
+                            ForEach(withoutData) { collapsedRow($0) }
                         }
                     }
                 }
