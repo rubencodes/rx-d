@@ -72,16 +72,28 @@ enum NotificationService {
         }
     }
 
-    // Cancel every pending reminder for a single occurrence — the primary and the
-    // whole follow-up series (one-shot or "repeat until done"). Used when a dose is
-    // marked taken from anywhere (notification DONE, widget intent, in-app tap/swipe,
-    // Control Center confirm). Matches by id prefix so it covers any number of repeats.
+    // Called when a dose is marked taken from anywhere (notification DONE, widget intent,
+    // in-app tap/swipe, Control Center confirm). Two scopes:
+    //   • Pending — cancel this occurrence's primary + follow-up series (future reminders
+    //     for other days stay scheduled). Matches the occurrence id prefix.
+    //   • Delivered — also clear any already-shown reminders for this *medication* from
+    //     Notification Center / the Lock Screen, so taking the dose dismisses the stale
+    //     banners. They all share the "<pid>-" id prefix (and threadIdentifier).
     static func cancelOccurrence(prescriptionId: UUID, scheduledDate: Date) {
-        let prefix = "\(prescriptionId)-\(scheduledDate.isoDateString)-\(scheduledDate.hhmmString)-"
         let center = UNUserNotificationCenter.current()
+
+        let occurrencePrefix = "\(prescriptionId)-\(scheduledDate.isoDateString)-\(scheduledDate.hhmmString)-"
         center.getPendingNotificationRequests { requests in
-            let ids = requests.map(\.identifier).filter { $0.hasPrefix(prefix) }
-            center.removePendingNotificationRequests(withIdentifiers: ids)
+            center.removePendingNotificationRequests(
+                withIdentifiers: requests.map(\.identifier).filter { $0.hasPrefix(occurrencePrefix) }
+            )
+        }
+
+        let medicationPrefix = "\(prescriptionId)-"
+        center.getDeliveredNotifications { delivered in
+            center.removeDeliveredNotifications(
+                withIdentifiers: delivered.map { $0.request.identifier }.filter { $0.hasPrefix(medicationPrefix) }
+            )
         }
     }
 

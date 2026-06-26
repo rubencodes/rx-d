@@ -44,14 +44,22 @@ struct MarkDoseTakenIntent: AppIntent {
         }
         try? context.save()
 
-        // Cancel the whole reminder series for this occurrence (primary + any
-        // follow-ups). Done inline rather than via NotificationService because this
-        // intent also runs in the widget extension, which doesn't compile that service.
-        let prefix = "\(pid)-\(date.isoDateString)-\(date.hhmmString)-"
+        // Clear reminders for this dose. Done inline rather than via NotificationService
+        // because this intent also runs in the widget extension, which doesn't compile
+        // that service. Pending: this occurrence's series. Delivered: any already-shown
+        // banners for the whole medication (Notification Center / Lock Screen).
         let center = UNUserNotificationCenter.current()
+        let occurrencePrefix = "\(pid)-\(date.isoDateString)-\(date.hhmmString)-"
+        let medicationPrefix = "\(pid)-"
+
         let pending = await center.pendingNotificationRequests()
         center.removePendingNotificationRequests(
-            withIdentifiers: pending.map(\.identifier).filter { $0.hasPrefix(prefix) }
+            withIdentifiers: pending.map(\.identifier).filter { $0.hasPrefix(occurrencePrefix) }
+        )
+
+        let delivered = await center.deliveredNotifications()
+        center.removeDeliveredNotifications(
+            withIdentifiers: delivered.map { $0.request.identifier }.filter { $0.hasPrefix(medicationPrefix) }
         )
 
         return .result()
