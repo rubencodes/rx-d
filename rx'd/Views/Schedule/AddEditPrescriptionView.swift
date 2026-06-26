@@ -34,6 +34,12 @@ struct AddEditPrescriptionView: View {
     @State private var timeSensitive = true
     @State private var isSaving = false
 
+    // Medications found in Apple Health that aren't imported yet, suggested when adding.
+    // Stored as plain strings so this view stays available below iOS 26 (the Health
+    // Medications API, and HealthKitService, are iOS 26+).
+    @State private var healthSuggestions: [MedSuggestion] = []
+    @State private var selectedHealthConceptID: String?
+
     private let notificationCenter: UNUserNotificationCenter = .current()
     private var isEditing: Bool { prescription != nil }
     private var isValid: Bool {
@@ -79,6 +85,29 @@ struct AddEditPrescriptionView: View {
     var body: some View {
         NavigationStack {
             Form {
+                if !isEditing, !healthSuggestions.isEmpty {
+                    Section {
+                        ForEach(healthSuggestions) { suggestion in
+                            Button {
+                                Task { await applySuggestion(suggestion) }
+                            } label: {
+                                HStack(spacing: 12) {
+                                    RxMonogram(size: 26, color: Theme.accent)
+                                    Text(suggestion.name).foregroundStyle(Theme.ink)
+                                    Spacer()
+                                    Image(systemName: selectedHealthConceptID == suggestion.archivedID
+                                        ? "checkmark.circle.fill" : "arrow.down.circle")
+                                        .foregroundStyle(Theme.accent)
+                                }
+                            }
+                        }
+                    } header: {
+                        Text("From Apple Health")
+                    } footer: {
+                        Text("Tap a medication you take to fill in its details.")
+                    }
+                }
+
                 Section {
                     TextField("e.g. Morning Vitamins", text: $name)
                 } header: {
@@ -189,6 +218,7 @@ struct AddEditPrescriptionView: View {
                 }
             }
             .onAppear { populate() }
+            .task { await loadHealthSuggestions() }
             .sheet(isPresented: $showPaywall) { PaywallView() }
         }
     }
@@ -256,6 +286,43 @@ struct AddEditPrescriptionView: View {
         }
     }
 
+    // Surface not-yet-imported Apple Health medications as suggestions (add mode only).
+    // Querying never prompts — it returns results only if the user already granted
+    // medication access via "Connect Apple Health", so this stays silent otherwise.
+    private func loadHealthSuggestions() async {
+        guard !isEditing else { return }
+        if #available(iOS 26, *) {
+            guard HealthKitService.isAvailable, SharedDefaults.shared.healthConnected else { return }
+            let meds = await HealthKitService.fetchMedications()
+            let imported = Set(activePrescriptions.compactMap(\.healthConceptID))
+            healthSuggestions = meds
+                .filter { !imported.contains($0.archivedID) }
+                .map { MedSuggestion(name: $0.name, archivedID: $0.archivedID) }
+        }
+    }
+
+    // Prefill the form from a Health medication — name, the schedule inferred from its
+    // dose-event history, and the link used later to mirror Health-logged doses.
+    private func applySuggestion(_ suggestion: MedSuggestion) async {
+        name = suggestion.name
+        color = "#2E6B5E"
+        selectedHealthConceptID = suggestion.archivedID
+        if #available(iOS 26, *), let concept = HealthKitService.unarchiveConcept(suggestion.archivedID) {
+            let schedules = await HealthKitService.inferredSchedules(for: concept)
+            if let s = schedules.first {
+                scheduledTime = Calendar.current.date(
+                    bySettingHour: s.hour, minute: s.minute, second: 0, of: Date()
+                ) ?? scheduledTime
+                if s.isDaily {
+                    isDaily = true
+                } else {
+                    isDaily = false
+                    selectedDays = Set(s.weekdays.compactMap { Weekday(rawValue: $0) })
+                }
+            }
+        }
+    }
+
     private func save() {
         // Guard against re-entrancy: a rapid double-tap (or a Save that doesn't
         // immediately dismiss) must not insert duplicate prescriptions.
@@ -286,6 +353,7 @@ struct AddEditPrescriptionView: View {
                 repeatRemindersUntilDone: repeatUntilDone,
                 timeSensitive: timeSensitive
             )
+            p.healthConceptID = selectedHealthConceptID
             context.insert(p)
         }
 
@@ -316,4 +384,12 @@ struct AddEditPrescriptionView: View {
             dismiss()
         }
     }
+}
+
+// A not-yet-imported Apple Health medication, reduced to plain strings so the add
+// screen can hold it without depending on the iOS 26-only Health Medications types.
+private struct MedSuggestion: Identifiable {
+    let name: String
+    let archivedID: String
+    var id: String { archivedID }
 }

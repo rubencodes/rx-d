@@ -22,25 +22,26 @@ struct OnboardingFlow: View {
     var body: some View {
         switch step {
         case 0:
-            WelcomeStep { step = 1 }
-        case 1:
-            AddFirstPrescriptionStep { step = 2 }
-        case 2:
-            EnableNotificationsStep {
-                guard #available(iOS 26, *) else {
-                    SharedDefaults.shared.hasCompletedOnboarding = true
-                    onComplete()
-                    return
+            WelcomeStep {
+                // Connect Health before adding a medication so it can be imported.
+                // The Health step is iOS 26+ and only when HealthKit is available;
+                // otherwise skip straight to adding a medication.
+                if #available(iOS 26, *), HealthKitService.isAvailable {
+                    step = 1
+                } else {
+                    step = 2
                 }
-
-                step = 3
             }
+        case 1:
+            if #available(iOS 26, *), HealthKitService.isAvailable {
+                EnableHealthStep { step = 2 }
+            }
+        case 2:
+            AddFirstPrescriptionStep { step = 3 }
         default:
-            if #available(iOS 26, *) {
-                EnableHealthStep {
-                    SharedDefaults.shared.hasCompletedOnboarding = true
-                    onComplete()
-                }
+            EnableNotificationsStep {
+                SharedDefaults.shared.hasCompletedOnboarding = true
+                onComplete()
             }
         }
     }

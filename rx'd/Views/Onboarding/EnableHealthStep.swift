@@ -4,9 +4,6 @@ import SwiftUI
 struct EnableHealthStep: View {
     let onComplete: () -> Void
 
-    @State private var store = StoreManager.shared
-    @State private var showPaywall = false
-
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
@@ -15,7 +12,7 @@ struct EnableHealthStep: View {
             Text("Connect Apple Health")
                 .font(.title.bold())
                 .foregroundStyle(Theme.ink)
-            Text("Optionally link Apple Health to import medications you've already set up and see how your vitals track with your doses.")
+            Text("Link Apple Health to import medications you've already set up. Then, get Rex Pro to see how your vitals track with your doses.")
                 .multilineTextAlignment(.center)
                 .foregroundStyle(Theme.inkFaded)
                 .padding(.horizontal, 32)
@@ -39,14 +36,11 @@ struct EnableHealthStep: View {
             Spacer()
 
             VStack(spacing: 12) {
-                Button(store.isPro ? "Connect Apple Health" : "Connect Apple Health (Rex Pro)") {
-                    if store.isPro {
-                        Task {
-                            await HealthKitService.requestAuthorization()
-                            onComplete()
-                        }
-                    } else {
-                        showPaywall = true
+                Button("Connect Apple Health") {
+                    Task {
+                        await HealthKitService.requestAuthorization()
+                        await HealthKitService.requestMedicationAuthorization()
+                        onComplete()
                     }
                 }
                 .buttonStyle(.borderedProminent)
@@ -61,7 +55,6 @@ struct EnableHealthStep: View {
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Theme.background.ignoresSafeArea())
-        .sheet(isPresented: $showPaywall) { PaywallView() }
     }
 
     private func benefit(_ icon: String, _ text: String) -> some View {
@@ -75,4 +68,9 @@ struct EnableHealthStep: View {
             Spacer()
         }
     }
+}
+
+@available(iOS 26, *)
+#Preview {
+    EnableHealthStep(onComplete: {})
 }

@@ -98,5 +98,5 @@ reinvent.
 ## DEBUG launch arguments (verification harness)
 
 `--seed`, `--tab <n>`, `--onboarding-step <n>`, `--all-done`, `--show-delete-alert`,
-`--show-archived-detail`, `--health-connected`, `--fake-vitals`, `--show-import`,
+`--show-archived-detail`, `--health-connected`, `--fake-vitals`,
 `--confirm-dose`, `--widget-gallery`, `--show-paywall`, `--prefill-name <name>`. Seeding logic is in `DebugSeed.swift`.

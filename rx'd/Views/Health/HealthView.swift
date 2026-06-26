@@ -13,7 +13,6 @@ struct HealthView: View {
     @State private var connected = HealthView.initialConnected()
     @State private var data: [HealthKitService.Vital: [Date: Double]] = [:]
     @State private var loading = false
-    @State private var showImport = false
 
     private let dayCount = 14
     private let cal = Calendar.current
@@ -23,14 +22,6 @@ struct HealthView: View {
             if ProcessInfo.processInfo.arguments.contains("--health-connected") { return true }
         #endif
         return SharedDefaults.shared.healthConnected
-    }
-
-    private static var debugShowImport: Bool {
-        #if DEBUG
-            return ProcessInfo.processInfo.arguments.contains("--show-import")
-        #else
-            return false
-        #endif
     }
 
     private var withData: [HealthKitService.Vital] {
@@ -45,29 +36,31 @@ struct HealthView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
-                    if !store.isPro {
-                        proPrompt
-                    } else if !connected {
+                    if !connected {
                         connectPrompt
                     } else {
-                        importButton
-
-                        if loading {
-                            ProgressView().frame(maxWidth: .infinity, minHeight: 200)
-                        } else {
-                            // Charts with data first, legend shown once.
-                            if !withData.isEmpty {
-                                legend
-                                ForEach(withData) { chartCard(for: $0) }
+                        // Vitals charting is Rex Pro; medications are imported from the
+                        // Add Medication screen (suggested there from Apple Health).
+                        if store.isPro {
+                            if loading {
+                                ProgressView().frame(maxWidth: .infinity, minHeight: 200)
                             } else {
-                                noDataHero
+                                // Charts with data first, legend shown once.
+                                if !withData.isEmpty {
+                                    legend
+                                    ForEach(withData) { chartCard(for: $0) }
+                                } else {
+                                    noDataHero
+                                }
+                                // Data-less vitals, collapsed.
+                                if !withoutData.isEmpty {
+                                    RuledHeader(title: "No recent data")
+                                        .padding(.top, 4)
+                                    ForEach(withoutData) { collapsedRow($0) }
+                                }
                             }
-                            // Data-less vitals, collapsed.
-                            if !withoutData.isEmpty {
-                                RuledHeader(title: "No recent data")
-                                    .padding(.top, 4)
-                                ForEach(withoutData) { collapsedRow($0) }
-                            }
+                        } else {
+                            vitalsProPrompt
                         }
                     }
                 }
@@ -78,34 +71,35 @@ struct HealthView: View {
             .background(Theme.background.ignoresSafeArea())
             .tabNavigationTitle("Health")
             .task { await load() }
-            .sheet(isPresented: $showImport) { ImportMedicationsView() }
             .sheet(isPresented: $showPaywall) { PaywallView() }
-            .onAppear { if HealthView.debugShowImport { showImport = true } }
         }
     }
 
-    // MARK: - Pro upsell (Apple Health is a Rex Pro feature)
+    // MARK: - Vitals Pro upsell (charting vitals is Rex Pro; importing meds is free)
 
-    private var proPrompt: some View {
-        VStack(spacing: 16) {
-            PillBuddy(mood: .happy, topColor: Theme.gold, size: 96)
-                .padding(.top, 24)
-                .padding(.bottom, 4)
-            Text("Apple Health is part of Rex Pro")
-                .font(.title3.weight(.bold))
-                .foregroundStyle(Theme.ink)
-                .multilineTextAlignment(.center)
-            Text("Import the medications you've set up in Health, mirror doses you log there, and chart your vitals against the days you stay on schedule.")
-                .font(.subheadline)
-                .foregroundStyle(Theme.inkFaded)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 24)
-            Button("Unlock Rex Pro") { showPaywall = true }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .tint(Theme.accent)
+    private var vitalsProPrompt: some View {
+        LabelCard {
+            VStack(spacing: 12) {
+                Image(systemName: "chart.xyaxis.line")
+                    .font(.largeTitle)
+                    .foregroundStyle(Theme.accent)
+                Text("Chart your vitals with Rex Pro")
+                    .font(.headline)
+                    .foregroundStyle(Theme.ink)
+                    .multilineTextAlignment(.center)
+                Text("See how your blood pressure, glucose, weight and more track against the days you stay on schedule.")
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.inkFaded)
+                    .multilineTextAlignment(.center)
+                Button("Unlock Rex Pro") { showPaywall = true }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    .tint(Theme.accent)
+                    .padding(.top, 4)
+            }
+            .padding(20)
+            .frame(maxWidth: .infinity)
         }
-        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Connect prompt
@@ -126,6 +120,7 @@ struct HealthView: View {
             Button("Connect Apple Health") {
                 Task {
                     await HealthKitService.requestAuthorization()
+                    await HealthKitService.requestMedicationAuthorization()
                     connected = true
                     await load()
                 }
@@ -141,26 +136,6 @@ struct HealthView: View {
             }
         }
         .frame(maxWidth: .infinity)
-    }
-
-    // MARK: - Import entry point
-
-    private var importButton: some View {
-        Button { showImport = true } label: {
-            HStack(spacing: 12) {
-                RxMonogram(size: 30, color: Theme.accent)
-                VStack(alignment: .leading, spacing: 1) {
-                    Text("Import from Apple Health").font(.headline).foregroundStyle(Theme.ink)
-                    Text("Copy medications you've set up in Health")
-                        .font(.caption).foregroundStyle(Theme.inkFaded)
-                }
-                Spacer()
-                Image(systemName: "chevron.right").font(.caption).foregroundStyle(Theme.inkFaded)
-            }
-            .padding(14)
-            .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.cardCornerRadius))
-        }
-        .buttonStyle(.plain)
     }
 
     // MARK: - Chart card (has data)
